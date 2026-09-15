@@ -84,78 +84,86 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
   return (
     <div className="flex-1 flex flex-col h-full bg-[#F8FAFC] overflow-y-auto">
       {/* Top Sticky Header Banner without specific university branding */}
-      <div className="sticky top-0 z-30 bg-white border-b-2 border-[#E2EEFC] px-5 sm:px-8 py-4 sm:py-5">
+      <div className="sticky top-0 z-30 bg-white border-b-2 border-[#E2EEFC] px-3.5 sm:px-8 pt-3 pb-2.5 sm:py-4">
         <div className="max-w-6xl mx-auto w-full">
-          <div className="flex items-center justify-between gap-3 mb-2">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center text-[#1677FF]">
-                <GraduationCap className="w-5 h-5" />
+          {/* Header Row: Icon + Title + Retake Button */}
+          <div className="flex items-center justify-between gap-2.5 mb-2">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              {/* Sleek beautifully displayed Icon */}
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#EFF6FF] border-2 border-[#1677FF] border-b-[3px] border-b-[#0A4EA8] text-[#1677FF] flex items-center justify-center shrink-0">
+                <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
               </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black text-[#0E2A54]">
-                  {displayName}, твои программы
+              <div className="min-w-0 flex-1">
+                <h1 className="text-base sm:text-xl font-black text-[#0E2A54] leading-tight truncate">
+                  {displayName ? `${displayName}, твои программы` : 'Твои программы'}
                 </h1>
-                <p className="text-xs text-slate-400 font-medium">
-                  Агрегатор программ вузов России · Приёмная кампания 2026
+                <p className="text-[11px] sm:text-xs text-slate-400 font-semibold truncate">
+                  Агрегатор программ вузов России
                 </p>
               </div>
             </div>
 
-            {/* Quick Retake Button */}
+            {/* Compact Retake Button */}
             <DuolingoButton
               variant="secondary"
               onClick={onRetake}
-              className="!h-10 !px-3.5 !text-xs shrink-0"
+              className="!h-9 !px-3 !text-xs shrink-0 rounded-xl"
               icon={<RotateCcw className="w-3.5 h-3.5" />}
             >
               Пересдать
             </DuolingoButton>
           </div>
 
-          {/* Stats Strip */}
-          <div className="grid grid-cols-2 gap-3 mt-3">
-            <div className="bg-[#EFF6FF] border-2 border-[#BFDBFE] border-b-[4px] border-b-[#93C5FD] rounded-2xl p-3 sm:p-4 text-center">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#1E40AF]">
-                Проходишь на бюджет
-              </span>
-              <div className="text-2xl sm:text-3xl font-black text-[#1E3A8A] mt-0.5">
-                {budgetCount} {budgetCount === 1 ? 'программа' : 'программ'}
+          {/* Compact Stats Strip */}
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="bg-[#EFF6FF] border-2 border-[#BFDBFE] border-b-[3px] border-b-[#93C5FD] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center justify-between min-w-0">
+              <div className="flex flex-col min-w-0">
+                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-[#1E40AF] truncate">
+                  На бюджет
+                </span>
+                <span className="text-sm sm:text-base font-black text-[#1E3A8A] truncate">
+                  {budgetCount} {budgetCount === 1 ? 'программа' : 'программ'}
+                </span>
               </div>
+              <CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0 ml-1 opacity-80" />
             </div>
 
-            <div className="bg-[#F0FDF4] border-2 border-[#BBF7D0] border-b-[4px] border-b-[#86EFAC] rounded-2xl p-3 sm:p-4 text-center">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#166534]">
-                На коммерцию
-              </span>
-              <div className="text-2xl sm:text-3xl font-black text-[#14532D] mt-0.5">
-                {paidCount} {paidCount === 1 ? 'программа' : 'программ'}
+            <div className="bg-[#F0FDF4] border-2 border-[#BBF7D0] border-b-[3px] border-b-[#86EFAC] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center justify-between min-w-0">
+              <div className="flex flex-col min-w-0">
+                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-[#166534] truncate">
+                  На коммерцию
+                </span>
+                <span className="text-sm sm:text-base font-black text-[#14532D] truncate">
+                  {paidCount} {paidCount === 1 ? 'программа' : 'программ'}
+                </span>
               </div>
+              <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 ml-1 opacity-80" />
             </div>
           </div>
 
           {/* Search & Filters Section */}
-          <div className="mt-3 flex flex-col gap-2.5">
-            {/* Search + City/Uni Dropdowns */}
-            <div className="flex flex-col sm:flex-row gap-2 items-stretch">
-              {/* Search input */}
-              <div className="relative flex items-center bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-3 py-2 flex-1">
-                <Search className="w-4 h-4 text-slate-400 mr-2 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Поиск по названию, вузу, городу..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent text-sm font-semibold text-[#0E2E59] placeholder:text-slate-400 placeholder:font-normal focus:outline-none"
-                />
-              </div>
+          <div className="mt-2.5 flex flex-col gap-2">
+            {/* Search input (full width) */}
+            <div className="relative flex items-center bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-3 py-1.5 sm:py-2 w-full">
+              <Search className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
+              <input
+                type="text"
+                placeholder="Поиск по названию, вузу, городу..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#0E2E59] placeholder:text-slate-400 placeholder:font-normal focus:outline-none"
+              />
+            </div>
 
+            {/* City & University Selectors ON THE SAME LINE */}
+            <div className="grid grid-cols-2 gap-2 w-full">
               {/* City Selector */}
-              <div className="flex items-center gap-1.5 bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-3 py-1.5 shrink-0">
-                <MapPin className="w-4 h-4 text-[#1677FF]" />
+              <div className="relative flex items-center bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-2.5 py-1.5 min-w-0">
+                <MapPin className="w-3.5 h-3.5 text-[#1677FF] mr-1.5 shrink-0" />
                 <select
                   value={selectedCity}
                   onChange={(e) => setSelectedCity(e.target.value)}
-                  className="bg-transparent text-xs sm:text-sm font-bold text-[#0E2E59] focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent text-xs font-bold text-[#0E2E59] focus:outline-none cursor-pointer truncate pr-1"
                 >
                   {CITIES_LIST.map((city) => (
                     <option key={city} value={city}>
@@ -166,12 +174,12 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               </div>
 
               {/* University Selector */}
-              <div className="flex items-center gap-1.5 bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-3 py-1.5 shrink-0">
-                <Building2 className="w-4 h-4 text-[#1677FF]" />
+              <div className="relative flex items-center bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-2.5 py-1.5 min-w-0">
+                <Building2 className="w-3.5 h-3.5 text-[#1677FF] mr-1.5 shrink-0" />
                 <select
                   value={selectedUniversity}
                   onChange={(e) => setSelectedUniversity(e.target.value)}
-                  className="bg-transparent text-xs sm:text-sm font-bold text-[#0E2E59] focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent text-xs font-bold text-[#0E2E59] focus:outline-none cursor-pointer truncate pr-1"
                 >
                   {universitiesList.map((uni) => (
                     <option key={uni} value={uni}>
@@ -182,12 +190,12 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               </div>
             </div>
 
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs">
+            {/* Filter Pills: ONE LINE ONLY, COMPACT, NEVER WRAP */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs flex-nowrap">
               <button
                 type="button"
                 onClick={() => setFilterCategory('all')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   filterCategory === 'all'
                     ? 'bg-[#1677FF] text-white border-b-2 border-[#0A4EA8]'
                     : 'bg-white text-slate-600 border border-[#D0E0F2]'
@@ -198,7 +206,7 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               <button
                 type="button"
                 onClick={() => setFilterCategory('budget')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   filterCategory === 'budget'
                     ? 'bg-[#1677FF] text-white border-b-2 border-[#0A4EA8]'
                     : 'bg-white text-slate-600 border border-[#D0E0F2]'
@@ -209,7 +217,7 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               <button
                 type="button"
                 onClick={() => setFilterCategory('paid')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   filterCategory === 'paid'
                     ? 'bg-[#1677FF] text-white border-b-2 border-[#0A4EA8]'
                     : 'bg-white text-slate-600 border border-[#D0E0F2]'
@@ -220,7 +228,7 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               <button
                 type="button"
                 onClick={() => setFilterCategory('it')}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   filterCategory === 'it'
                     ? 'bg-[#1677FF] text-white border-b-2 border-[#0A4EA8]'
                     : 'bg-white text-slate-600 border border-[#D0E0F2]'
@@ -234,7 +242,7 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
       </div>
 
       {/* Program Cards Grid */}
-      <div className="flex-1 p-5 sm:p-8 max-w-6xl mx-auto w-full">
+      <div className="flex-1 p-3.5 sm:p-8 max-w-6xl mx-auto w-full">
         {filteredMatches.length === 0 ? (
           <div className="text-center py-12 bg-white border-2 border-dashed border-[#CADDF4] rounded-3xl p-6">
             <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-3" />
