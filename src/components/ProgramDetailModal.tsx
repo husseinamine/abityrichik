@@ -28,34 +28,47 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
       {/* Modal Container with Clean Duolingo Borders and Zero Fuzzy Shadows */}
       <div className="bg-white rounded-3xl border-2 border-[#CADDF4] border-b-[6px] border-b-[#A8C6EB] w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-        {/* Modal Header */}
-        <div className="p-5 sm:p-6 border-b-2 border-[#E2EEFC] bg-[#F8FAFC] flex items-start justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="px-2.5 py-0.5 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] text-xs font-extrabold text-[#1677FF]">
+        {/* Modal Header with Image Cover & Shadowed Gradient Background */}
+        <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-900 shrink-0">
+          <img
+            src={program.imageUrl}
+            alt={program.title}
+            className="w-full h-full object-cover"
+          />
+          {/* Shadowed Gradient Background Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/50 to-black/30" />
+
+          {/* Top Bar: Badges & Close Button */}
+          <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-3 z-10">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-md text-xs font-black text-[#1677FF]">
                 {program.university}
               </span>
-              <span className="px-2.5 py-0.5 rounded-lg bg-slate-100 text-xs font-bold text-slate-600 flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-slate-400" />
+              <span className="px-2.5 py-1 rounded-xl bg-black/50 backdrop-blur-md text-xs font-bold text-white flex items-center gap-1 border border-white/20">
+                <MapPin className="w-3.5 h-3.5 text-blue-300" />
                 {program.city}
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#0E2A54] leading-tight">
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md border border-white/30 flex items-center justify-center text-slate-800 hover:bg-white active:scale-95 cursor-pointer shrink-0"
+              aria-label="Закрыть"
+            >
+              <X className="w-5 h-5 stroke-[2.5]" />
+            </button>
+          </div>
+
+          {/* Bottom Title & Faculty */}
+          <div className="absolute bottom-4 left-4 right-4 z-10">
+            <h2 className="text-xl sm:text-2xl font-black text-white leading-tight drop-shadow-md">
               {program.title}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
+            <p className="text-xs sm:text-sm text-slate-200 mt-0.5 font-medium drop-shadow-xs">
               {program.faculty}
             </p>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-10 h-10 rounded-2xl bg-white border-2 border-[#CADDF4] border-b-[3px] border-b-[#A8C6EB] flex items-center justify-center text-slate-500 hover:text-slate-900 active:translate-y-[2px] active:border-b-2 cursor-pointer shrink-0"
-            aria-label="Закрыть"
-          >
-            <X className="w-5 h-5 stroke-[2.5]" />
-          </button>
         </div>
 
         {/* 3 Main Tabs Navigation */}

@@ -31,6 +31,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Москва',
     city: 'Москва',
     faculty: 'Факультет компьютерных наук (ФКН)',
+    imageUrl:
+      'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 298,
     paidPassingScore: 210,
     budgetPlaces: 120,
@@ -62,6 +64,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Санкт-Петербург',
     city: 'Санкт-Петербург',
     faculty: 'Факультет информационных технологий и программирования (ФИТиП)',
+    imageUrl:
+      'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 302,
     paidPassingScore: 215,
     budgetPlaces: 110,
@@ -93,7 +97,9 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Москва',
     city: 'Москва',
     faculty: 'Факультет вычислительной математики и кибернетики (ВМК)',
-    budgetPassingScore: 345, // includes internal exam
+    imageUrl:
+      'https://images.unsplash.com/photo-1513326738677-b964603b136d?q=80&w=800&auto=format&fit=crop',
+    budgetPassingScore: 345,
     paidPassingScore: 230,
     budgetPlaces: 80,
     paidPlaces: 40,
@@ -124,6 +130,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Нижний Новгород',
     city: 'Нижний Новгород',
     faculty: 'Факультет информатики, математики и компьютерных наук',
+    imageUrl:
+      'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 282,
     paidPassingScore: 185,
     budgetPlaces: 60,
@@ -154,6 +162,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Москва',
     city: 'Москва',
     faculty: 'Факультет информатики и систем управления (ИУ)',
+    imageUrl:
+      'https://images.unsplash.com/photo-1590012314607-cda9d9b699ae?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 290,
     paidPassingScore: 195,
     budgetPlaces: 140,
@@ -184,6 +194,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Санкт-Петербург',
     city: 'Санкт-Петербург',
     faculty: 'Санкт-Петербургская школа физико-математических и компьютерных наук',
+    imageUrl:
+      'https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 289,
     paidPassingScore: 190,
     budgetPlaces: 75,
@@ -214,6 +226,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Санкт-Петербург',
     city: 'Санкт-Петербург',
     faculty: 'Экономический факультет',
+    imageUrl:
+      'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 278,
     paidPassingScore: 175,
     budgetPlaces: 65,
@@ -244,6 +258,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Казань',
     city: 'Казань',
     faculty: 'Институт вычислительной математики и информационных технологий (ИВМиИТ)',
+    imageUrl:
+      'https://images.unsplash.com/photo-1583037189850-1921ae7c6c22?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 268,
     paidPassingScore: 160,
     budgetPlaces: 80,
@@ -274,6 +290,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Екатеринбург',
     city: 'Екатеринбург',
     faculty: 'Институт радиоэлектроники и информационных технологий (ИРИТ-РТФ)',
+    imageUrl:
+      'https://images.unsplash.com/photo-1564981797816-1043664bf78d?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 264,
     paidPassingScore: 155,
     budgetPlaces: 120,
@@ -304,6 +322,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Москва',
     city: 'Москва',
     faculty: 'Школа дизайна факультета креативных индустрий',
+    imageUrl:
+      'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 292,
     paidPassingScore: 210,
     budgetPlaces: 40,
@@ -334,6 +354,8 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     campus: 'Пермь',
     city: 'Пермь',
     faculty: 'Социально-гуманитарный факультет',
+    imageUrl:
+      'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=800&auto=format&fit=crop',
     budgetPassingScore: 255,
     paidPassingScore: 150,
     budgetPlaces: 35,

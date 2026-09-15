@@ -50,6 +50,7 @@ export interface Program {
   };
   requiresCreativeExam?: boolean;
   tags: string[];
+  imageUrl: string;
   description: string;
   vkChatLink: string;
   vkChatDescription: string;

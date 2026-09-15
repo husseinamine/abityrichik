@@ -274,27 +274,43 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
                   <div
                     key={program.id}
                     onClick={() => setActiveModalProgram(program)}
-                    className="bg-white border-2 border-[#D3E2F4] border-b-[4px] border-b-[#BACEE5] hover:border-[#1677FF] hover:border-b-[#0A4EA8] rounded-2xl p-4 flex flex-col justify-between gap-3 cursor-pointer active:translate-y-[2px] transition-all"
+                    className="bg-white border-2 border-[#D3E2F4] border-b-[5px] border-b-[#BACEE5] hover:border-[#1677FF] hover:border-b-[#0A4EA8] rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer active:translate-y-[2px] transition-all group"
                   >
-                    {/* Header: University, City & Title */}
-                    <div>
-                      <div className="flex items-center justify-between gap-2 mb-1.5">
-                        <span className="px-2 py-0.5 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] text-[11px] font-extrabold text-[#1677FF]">
+                    {/* Card Image Banner with Shadowed Gradient Background */}
+                    <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-200">
+                      <img
+                        src={program.imageUrl}
+                        alt={program.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                      {/* Shadowed Gradient Background Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-black/25" />
+
+                      {/* University & City Badges Overlaid at Top */}
+                      <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
+                        <span className="px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-md text-[11px] font-black text-[#1677FF]">
                           {program.university}
                         </span>
-                        <span className="text-[11px] font-bold text-slate-500 flex items-center gap-0.5">
-                          <MapPin className="w-3 h-3 text-slate-400" />
+                        <span className="px-2.5 py-1 rounded-xl bg-black/50 backdrop-blur-md text-[11px] font-bold text-white flex items-center gap-1 border border-white/20">
+                          <MapPin className="w-3 h-3 text-blue-300" />
                           {program.city}
                         </span>
                       </div>
 
-                      <h3 className="font-extrabold text-base sm:text-lg text-[#0E2E59] leading-snug">
-                        {program.title}
-                      </h3>
-                      <span className="text-xs text-slate-400 font-medium">
-                        {program.faculty}
-                      </span>
+                      {/* Title & Faculty Overlaid on Shadowed Background */}
+                      <div className="absolute bottom-3 left-3 right-3 z-10">
+                        <h3 className="font-extrabold text-base sm:text-lg text-white leading-snug drop-shadow-md">
+                          {program.title}
+                        </h3>
+                        <span className="text-xs text-slate-200 font-medium line-clamp-1 opacity-90 drop-shadow-xs">
+                          {program.faculty}
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Card Content Body */}
+                    <div className="p-4 flex flex-col justify-between gap-3 flex-1">
 
                     {/* Admission Status Badge */}
                     {missingSubjects.length > 0 ? (
@@ -373,11 +389,12 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
                       <span className="text-[#1677FF] font-bold">Подробнее →</span>
                     </div>
                   </div>
-                );
-              }
-            )}
-          </div>
-        )}
+                </div>
+              );
+            }
+          )}
+        </div>
+      )}
 
         {/* Retake Button at bottom */}
         <div className="pt-2 pb-8 max-w-md mx-auto w-full">
