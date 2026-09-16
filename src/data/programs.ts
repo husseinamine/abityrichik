@@ -143,21 +143,21 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     ],
   },
 
-  // 4. HSE Nizhny Novgorod - Software Engineering
+  // 4. HSE Nizhny Novgorod - Applied Math and Computer Science
   {
-    id: 'hse-nn-se',
-    title: 'Программная инженерия',
+    id: 'hse-nn-pmi',
+    title: 'Прикладная математика и информатика',
     university: 'НИУ ВШЭ',
     campus: 'Нижний Новгород',
     city: 'Нижний Новгород',
     faculty: 'Факультет информатики, математики и компьютерных наук',
-    officialProgramUrl: 'https://nnov.hse.ru/ba/se/',
+    officialProgramUrl: 'https://nnov.hse.ru/ba/ami/',
     imageUrl:
       'https://upload.wikimedia.org/wikipedia/commons/c/c3/Nizhny_Novgorod._Bolshaya_Pecherskaya_St.%2C_16.jpg',
-    budgetPassingScore: 282,
-    paidPassingScore: 185,
-    budgetPlaces: 60,
-    paidPlaces: 35,
+    budgetPassingScore: 284,
+    paidPassingScore: 180,
+    budgetPlaces: 50,
+    paidPlaces: 30,
     requiredSubjects: {
       primary: ['russian', 'math'],
       choice: ['cs', 'physics'],
@@ -168,16 +168,16 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
       physics: 60,
       russian: 60,
     },
-    tags: ['IT', 'Разработка ПО', 'AI', 'Регионы'],
+    tags: ['IT', 'Машинное обучение', 'AI', 'Алгоритмы', 'Регионы'],
     description:
-      'Московский диплом НИУ ВШЭ с сильным фокусом на IT-индустрию в признанной столице IT Поволжья. Практика на реальных проектах, сильная математическая школа и плотное партнёрство с нижегородскими IT-компаниями и центрами разработки.',
-    vkChatLink: 'https://vk.me/join/hse_nn_se_2026',
+      'Программа НИУ ВШЭ в Нижнем Новгороде по направлению «Прикладная математика и информатика». Сочетает фундаментальную математику, передовые методы машинного обучения (AI/ML), спортивное программирование и проектную работу с ведущими IT-компаниями.',
+    vkChatLink: 'https://vk.me/join/hse_nn_pmi_2026',
     vkChatDescription:
-      'Чат абитуриентов Вышки в Нижнем Новгороде: студенты делятся реальным опытом обучения на Большой Печёрской и рассказывают про поступление.',
+      'Чат абитуриентов ПМИ Вышки в Нижнем Новгороде: студенты делятся реальным опытом учёбы на Большой Печёрской, рассказывают про курсы и поступление.',
     cityInfo:
       'Нижний Новгород — один из крупнейших IT-кластеров страны, город на слиянии Волги и Оки с живописными набережными, старинным кремлем и доступной стоимостью жизни.',
     importantLinks: [
-      { label: 'Официальная страница программы в НН', url: 'https://nnov.hse.ru/ba/se/' },
+      { label: 'Официальная страница программы «ПМИ» в НН', url: 'https://nnov.hse.ru/ba/ami/' },
       { label: 'Приёмная комиссия НИУ ВШЭ — Нижний Новгород', url: 'https://nnov.hse.ru/ba/' },
     ],
   },
@@ -457,6 +457,45 @@ export const UNIVERSITY_PROGRAMS: Program[] = [
     importantLinks: [
       { label: 'Официальная страница программы в Перми', url: 'https://perm.hse.ru/ba/bi/' },
       { label: 'Приёмная комиссия НИУ ВШЭ — Пермь', url: 'https://perm.hse.ru/ba/' },
+    ],
+  },
+
+  // 12. UNN Lobachevsky Nizhny Novgorod - Applied Math and CS
+  {
+    id: 'nngu-nn-pmi',
+    title: 'Прикладная математика и информатика',
+    university: 'ННГУ им. Н.И. Лобачевского',
+    campus: 'Нижний Новгород',
+    city: 'Нижний Новгород',
+    faculty: 'Институт информационных технологий, математики и механики (ИИТММ)',
+    officialProgramUrl: 'http://www.itmm.unn.ru/',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/c/c3/Nizhny_Novgorod._Bolshaya_Pecherskaya_St.%2C_16.jpg',
+    budgetPassingScore: 260,
+    paidPassingScore: 165,
+    budgetPlaces: 100,
+    paidPlaces: 60,
+    requiredSubjects: {
+      primary: ['russian', 'math'],
+      choice: ['cs', 'physics'],
+    },
+    minSubjectScores: {
+      math: 55,
+      cs: 55,
+      physics: 55,
+      russian: 50,
+    },
+    tags: ['IT', 'Фундаментальная математика', 'Вычислительные методы', 'Алгоритмы'],
+    description:
+      'Классическая университетская школа прикладной математики и кибернетики Нижегородского государственного университета им. Н.И. Лобачевского. Обучение базируется на мощной научной базе вычислительной математики, теоретической информатики, математического моделирования и численных методов.',
+    vkChatLink: 'https://vk.me/join/unn_itmm_2026',
+    vkChatDescription:
+      'Чат абитуриентов Института ИИТММ ННГУ: вопросы про учёбу на проспекте Гагарина, баллы прошлых лет, общежития и студенческие секции.',
+    cityInfo:
+      'Нижний Новгород — признанный научно-образовательный центр Поволжья с сильными традициями математических исследований.',
+    importantLinks: [
+      { label: 'Институт ИИТММ ННГУ им. Лобачевского', url: 'http://www.itmm.unn.ru/' },
+      { label: 'Приёмная комиссия ННГУ', url: 'https://admissions.unn.ru/' },
     ],
   },
 ];

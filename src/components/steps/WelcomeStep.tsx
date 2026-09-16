@@ -18,7 +18,7 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext }) => {
             <Mascot />
           </div>
           <div className="shrink-0 -ml-2 sm:-ml-3 mt-0 z-10">
-            <SpeechBubble lines={['Привет!', 'я X.']} />
+            <SpeechBubble lines={['Привет!', 'я СОВА.']} />
           </div>
         </div>
 

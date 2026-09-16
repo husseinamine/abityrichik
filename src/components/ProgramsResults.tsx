@@ -4,8 +4,8 @@ import { UNIVERSITY_PROGRAMS, CITIES_LIST, EGE_SUBJECTS } from '../data/programs
 import { matchPrograms } from '../utils/matcher';
 import { DuolingoButton } from './DuolingoButton';
 import { ProgramDetailModal } from './ProgramDetailModal';
+import { SideMenu } from './SideMenu';
 import {
-  RotateCcw,
   CheckCircle2,
   AlertCircle,
   GraduationCap,
@@ -14,21 +14,56 @@ import {
   MapPin,
   Building2,
   ChevronRight,
+  ArrowLeftRight,
+  Check,
+  Menu,
 } from 'lucide-react';
 
 interface ProgramsResultsProps {
   profile: UserProfile;
   onRetake: () => void;
+  comparisonIds: string[];
+  onToggleComparison: (id: string) => { added: boolean; error?: string };
+  onNavigateToComparison: () => void;
+  onNavigateToSteps: () => void;
+  onRestartOnboarding?: () => void;
+  onUpdateProfile?: (updated: Partial<UserProfile>) => void;
 }
 
-export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRetake }) => {
+export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
+  profile,
+  onRetake,
+  comparisonIds,
+  onToggleComparison,
+  onNavigateToComparison,
+  onNavigateToSteps,
+  onRestartOnboarding,
+  onUpdateProfile,
+}) => {
   const [filterCategory, setFilterCategory] = useState<'all' | 'budget' | 'paid' | 'it'>('all');
   const [selectedCity, setSelectedCity] = useState<string>(profile.preferredCity || 'Все города');
   const [selectedUniversity, setSelectedUniversity] = useState<string>('Все вузы');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeModalProgram, setActiveModalProgram] = useState<Program | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState<boolean>(false);
 
   const displayName = profile.name.trim() || 'Абитуриент';
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
+
+  const handleToggle = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const result = onToggleComparison(id);
+    if (result.error) {
+      showToast(result.error);
+    }
+  };
 
   // Extract unique university names
   const universitiesList = useMemo(() => {
@@ -85,11 +120,19 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
   const paidCount = filteredMatches.filter((m) => m.qualifiesPaid).length;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#F8FAFC] overflow-y-auto">
+    <div className="flex-1 flex flex-col h-full bg-[#F8FAFC] overflow-y-auto relative pb-20">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#0E2E59] text-white px-4 py-2.5 rounded-2xl shadow-xl border border-blue-400/30 text-xs sm:text-sm font-bold animate-in fade-in slide-in-from-top-3 duration-200 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* Top Sticky Header Banner */}
       <div className="sticky top-0 z-30 bg-white border-b-2 border-[#E2EEFC] px-3.5 sm:px-8 pt-3 pb-2.5 sm:py-4">
         <div className="max-w-6xl mx-auto w-full">
-          {/* Header Row: Icon + Title + Retake / Enter Scores Button */}
+          {/* Header Row: Title & Subtitle + Burger Menu Button */}
           <div className="flex items-center justify-between gap-2.5 mb-2">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#EFF6FF] border-2 border-[#1677FF] border-b-[3px] border-b-[#0A4EA8] text-[#1677FF] flex items-center justify-center shrink-0">
@@ -97,29 +140,24 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-base sm:text-xl font-black text-[#0E2A54] leading-tight truncate">
-                  {displayName ? `${displayName}, твои программы` : 'Твои программы'}
+                  Привет, {displayName}!
                 </h1>
                 <p className="text-[11px] sm:text-xs text-slate-400 font-semibold truncate">
-                  Агрегатор программ вузов России
+                  Твои программы • Агрегатор вузов России
                 </p>
               </div>
             </div>
 
-            {/* Retake / Enter Scores CTA Button */}
-            <DuolingoButton
-              variant={profile.knowsScores ? 'secondary' : 'primary'}
-              onClick={onRetake}
-              className="!h-9 !px-3 !text-xs shrink-0 rounded-xl"
-              icon={
-                profile.knowsScores ? (
-                  <RotateCcw className="w-3.5 h-3.5" />
-                ) : (
-                  <Sparkles className="w-3.5 h-3.5" />
-                )
-              }
+            {/* Burger Menu Button on the very right end */}
+            <button
+              type="button"
+              onClick={() => setIsSideMenuOpen(true)}
+              className="w-10 h-10 rounded-2xl bg-white border-2 border-[#D3E2F4] border-b-[3px] border-b-[#BACEE5] hover:border-[#1677FF] hover:bg-[#EFF6FF] text-[#0E2E59] hover:text-[#1677FF] flex items-center justify-center cursor-pointer transition-all active:translate-y-[1px] shrink-0 shadow-2xs group"
+              aria-label="Открыть меню профиля"
+              title="Меню"
             >
-              {profile.knowsScores ? 'Пересдать' : 'Ввести баллы ЕГЭ'}
-            </DuolingoButton>
+              <Menu className="w-5 h-5 stroke-[2.5] group-hover:scale-105 transition-transform" />
+            </button>
           </div>
 
           {/* Compact Stats Strip */}
@@ -324,6 +362,8 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
                 missingSubjects,
                 pointsToBudget,
               }) => {
+                const isInComparison = comparisonIds.includes(program.id);
+
                 return (
                   <div
                     key={program.id}
@@ -504,20 +544,32 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
                         </div>
                       </div>
 
-                      {/* Tags & Action prompt */}
-                      <div className="flex items-center justify-between pt-1 text-[11px]">
-                        <div className="flex flex-wrap gap-1">
-                          {program.tags.slice(0, 2).map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-600 text-[10px]"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+                      {/* Bottom Action Row: Compare Button + Details Link */}
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100 gap-2">
+                        {/* Tactile Compare Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggle(e, program.id)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer select-none active:translate-y-[1px] ${
+                            isInComparison
+                              ? 'bg-[#EFF6FF] text-[#1677FF] border-2 border-[#1677FF] border-b-[3px] border-b-[#0A4EA8]'
+                              : 'bg-white hover:bg-slate-50 text-slate-700 border-2 border-[#CADDF4] border-b-[3px] border-b-[#BACEE5] hover:border-[#1677FF]'
+                          }`}
+                        >
+                          {isInComparison ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 stroke-[3] text-[#1677FF]" />
+                              <span>В сравнении</span>
+                            </>
+                          ) : (
+                            <>
+                              <ArrowLeftRight className="w-3.5 h-3.5 text-[#1677FF]" />
+                              <span>Сравнить</span>
+                            </>
+                          )}
+                        </button>
 
-                        <span className="text-[#1677FF] font-bold flex items-center gap-0.5 group-hover:translate-x-1 transition-transform">
+                        <span className="text-[#1677FF] font-bold text-xs flex items-center gap-0.5 group-hover:translate-x-1 transition-transform">
                           Подробнее <ChevronRight className="w-3.5 h-3.5" />
                         </span>
                       </div>
@@ -530,11 +582,46 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
         )}
       </div>
 
+      {/* Floating Compare Bar (when 1+ programs are selected) */}
+      {comparisonIds.length > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md border-2 border-[#1677FF] border-b-[4px] border-b-[#0A4EA8] rounded-2xl px-4 py-2.5 shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#1677FF] text-white flex items-center justify-center font-black text-xs">
+              {comparisonIds.length}
+            </div>
+            <span className="text-xs font-bold text-[#0E2E59] hidden sm:inline">
+              {comparisonIds.length === 1 ? '1 программа в сравнении' : `${comparisonIds.length} программы в сравнении`}
+            </span>
+          </div>
+
+          <DuolingoButton
+            onClick={onNavigateToComparison}
+            className="!h-8 !px-3.5 !text-xs"
+            icon={<ArrowLeftRight className="w-3.5 h-3.5" />}
+          >
+            Сравнить планы ({comparisonIds.length})
+          </DuolingoButton>
+        </div>
+      )}
+
       {/* Program Detail Modal */}
       <ProgramDetailModal
         program={activeModalProgram}
         profile={profile}
         onClose={() => setActiveModalProgram(null)}
+      />
+
+      {/* Slide-over Side Menu */}
+      <SideMenu
+        isOpen={isSideMenuOpen}
+        onClose={() => setIsSideMenuOpen(false)}
+        profile={profile}
+        comparisonCount={comparisonIds.length}
+        onRetake={onRetake}
+        onNavigateToComparison={onNavigateToComparison}
+        onNavigateToSteps={onNavigateToSteps}
+        onRestartOnboarding={onRestartOnboarding}
+        onUpdateProfile={onUpdateProfile}
       />
     </div>
   );
