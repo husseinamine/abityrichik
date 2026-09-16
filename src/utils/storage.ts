@@ -5,16 +5,13 @@ const STORAGE_KEY = 'russia_uni_aggregator_user_profile';
 export const DEFAULT_PROFILE: UserProfile = {
   name: '',
   preferredCity: 'Все города',
+  knowsScores: false,
   selectedSubjects: ['russian', 'math'],
   scores: {
     russian: 85,
     math: 80,
   },
   achievements: 0,
-  creativeExam: {
-    taking: false,
-    score: 80,
-  },
 };
 
 export function loadUserProfile(): UserProfile | null {
@@ -26,6 +23,7 @@ export function loadUserProfile(): UserProfile | null {
       return {
         ...DEFAULT_PROFILE,
         ...parsed,
+        knowsScores: parsed.knowsScores ?? (parsed.selectedSubjects && parsed.selectedSubjects.length > 0),
       };
     }
   } catch (e) {

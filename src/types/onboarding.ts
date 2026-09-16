@@ -12,19 +12,20 @@ export type SubjectId =
 export interface SubjectInfo {
   id: SubjectId;
   name: string;
-  shortName?: string;
+  shortName: string;
   defaultRequired?: boolean;
 }
 
 export interface UserProfile {
   name: string;
   preferredCity: string; // e.g. 'Москва', 'Санкт-Петербург', 'Нижний Новгород', 'Все города'
+  knowsScores: boolean; // whether the user knows & enters their ЕГЭ marks
   selectedSubjects: SubjectId[];
   scores: Partial<Record<SubjectId, number>>;
   achievements: number; // 0 - 10
-  creativeExam: {
+  creativeExam?: {
     taking: boolean;
-    score: number; // 0 - 100
+    score: number;
   };
 }
 
@@ -40,6 +41,7 @@ export interface Program {
   campus?: string;
   city: string;
   faculty: string;
+  officialProgramUrl: string; // Direct official university bachelor program page
   budgetPassingScore: number;
   paidPassingScore: number;
   budgetPlaces: number;
@@ -48,6 +50,7 @@ export interface Program {
     primary: SubjectId[];
     choice?: SubjectId[];
   };
+  minSubjectScores: Partial<Record<SubjectId, number>>; // Minimum marks for application per subject
   requiresCreativeExam?: boolean;
   tags: string[];
   imageUrl: string;

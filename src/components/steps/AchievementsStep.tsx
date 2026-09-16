@@ -2,14 +2,12 @@ import React from 'react';
 import { Mascot } from '../Mascot';
 import { SpeechBubble } from '../SpeechBubble';
 import { DuolingoButton } from '../DuolingoButton';
-import { ArrowRight, Award, Palette, Minus, Plus } from 'lucide-react';
+import { ArrowRight, Award, Minus, Plus } from 'lucide-react';
 
 interface AchievementsStepProps {
   userName: string;
   achievements: number;
-  creativeExam: { taking: boolean; score: number };
   onChangeAchievements: (val: number) => void;
-  onChangeCreativeExam: (val: { taking: boolean; score: number }) => void;
   onSubmit: () => void;
   onBack: () => void;
 }
@@ -17,9 +15,7 @@ interface AchievementsStepProps {
 export const AchievementsStep: React.FC<AchievementsStepProps> = ({
   userName,
   achievements,
-  creativeExam,
   onChangeAchievements,
-  onChangeCreativeExam,
   onSubmit,
   onBack,
 }) => {
@@ -39,99 +35,49 @@ export const AchievementsStep: React.FC<AchievementsStepProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 max-w-2xl mx-auto w-full">
+        <div className="flex flex-col gap-4 max-w-xl mx-auto w-full">
           {/* Individual Achievements Card */}
-          <div className="bg-white border-2 border-[#D3E2F4] border-b-[4px] border-b-[#BACEE5] rounded-2xl p-4">
+          <div className="bg-white border-2 border-[#D3E2F4] border-b-[4px] border-b-[#BACEE5] rounded-2xl p-5">
             <div className="flex items-center gap-2.5 mb-2 text-[#0E2E59]">
-              <div className="w-8 h-8 rounded-xl bg-[#EBF4FE] border border-[#CADDF4] flex items-center justify-center text-[#1677FF]">
-                <Award className="w-4.5 h-4.5" />
+              <div className="w-9 h-9 rounded-xl bg-[#EBF4FE] border border-[#CADDF4] flex items-center justify-center text-[#1677FF] shrink-0">
+                <Award className="w-5 h-5" />
               </div>
-              <span className="font-bold text-base">Индивидуальные достижения (ИД)</span>
+              <span className="font-bold text-base sm:text-lg">Индивидуальные достижения (ИД)</span>
             </div>
 
-            <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-              Золотая медаль, победы в олимпиадах, ГТО или волонтёрство. Прибавляются к сумме ЕГЭ (максимум — 10 баллов).
+            <p className="text-xs sm:text-sm text-slate-500 mb-4 leading-relaxed">
+              Аттестат с отличием / золотая медаль, победы в перечневых олимпиадах, значок ГТО или волонтёрство. Прибавляются к твоей сумме ЕГЭ (максимум — 10 баллов суммарно во всех вузах).
             </p>
 
-            <div className="flex items-center justify-between bg-[#F1F6FD] border border-[#CADDF4] rounded-xl p-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#355278] pl-2">
-                Баллов за ИД:
+            <div className="flex items-center justify-between bg-[#F1F6FD] border border-[#CADDF4] rounded-xl p-2.5">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#355278] pl-2">
+                Баллов за достижения:
               </span>
 
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => onChangeAchievements(Math.max(0, achievements - 1))}
-                  className="w-8 h-8 rounded-lg bg-white border border-[#CADDF4] border-b-2 border-b-[#A8C6EB] flex items-center justify-center text-[#254670] hover:bg-slate-50 active:translate-y-[1px] active:border-b-0 cursor-pointer"
+                  className="w-9 h-9 rounded-lg bg-white border border-[#CADDF4] border-b-2 border-b-[#A8C6EB] flex items-center justify-center text-[#254670] hover:bg-slate-50 active:translate-y-[1px] active:border-b-0 cursor-pointer"
                   aria-label="Уменьшить"
                 >
-                  <Minus className="w-4 h-4" />
+                  <Minus className="w-4 h-4 stroke-[2.5]" />
                 </button>
 
-                <span className="w-8 text-center font-extrabold text-xl text-[#0E2E59]">
+                <span className="w-8 text-center font-black text-xl text-[#0E2E59]">
                   {achievements}
                 </span>
 
                 <button
                   type="button"
                   onClick={() => onChangeAchievements(Math.min(10, achievements + 1))}
-                  className="w-8 h-8 rounded-lg bg-white border border-[#CADDF4] border-b-2 border-b-[#A8C6EB] flex items-center justify-center text-[#254670] hover:bg-slate-50 active:translate-y-[1px] active:border-b-0 cursor-pointer"
+                  className="w-9 h-9 rounded-lg bg-white border border-[#CADDF4] border-b-2 border-b-[#A8C6EB] flex items-center justify-center text-[#254670] hover:bg-slate-50 active:translate-y-[1px] active:border-b-0 cursor-pointer"
                   aria-label="Увеличить"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4 stroke-[2.5]" />
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Creative Exam (ДВИ) Card */}
-          <div className="bg-white border-2 border-dashed border-[#CADDF4] rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2 text-[#0E2E59]">
-                <div className="w-8 h-8 rounded-xl bg-[#FFF8EB] border border-[#FDE68A] flex items-center justify-center text-[#D97706]">
-                  <Palette className="w-4.5 h-4.5" />
-                </div>
-                <span className="font-bold text-base">Творческое испытание (ДВИ)</span>
-              </div>
-
-              <input
-                type="checkbox"
-                id="creative-toggle"
-                checked={creativeExam.taking}
-                onChange={(e) =>
-                  onChangeCreativeExam({
-                    ...creativeExam,
-                    taking: e.target.checked,
-                  })
-                }
-                className="w-5 h-5 rounded accent-[#1677FF] cursor-pointer"
-              />
-            </div>
-
-            <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-              Необходимо только для программ Школы дизайна.
-            </p>
-
-            {creativeExam.taking && (
-              <div className="flex items-center justify-between bg-[#FFFBF0] border border-[#FDE68A] rounded-xl p-2 animate-in fade-in duration-200">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#92400E] pl-2">
-                  Балл за ДВИ:
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={creativeExam.score}
-                  onChange={(e) =>
-                    onChangeCreativeExam({
-                      ...creativeExam,
-                      score: Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0)),
-                    })
-                  }
-                  className="w-16 h-8 text-center font-extrabold text-base text-[#92400E] bg-white border border-[#FDE68A] rounded-lg focus:outline-none"
-                />
-              </div>
-            )}
           </div>
         </div>
       </div>

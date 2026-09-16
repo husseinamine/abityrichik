@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import type { Program } from '../types/onboarding';
+import type { Program, UserProfile } from '../types/onboarding';
+import { EGE_SUBJECTS } from '../data/programs';
 import { DuolingoButton } from './DuolingoButton';
 import {
   X,
@@ -11,14 +12,20 @@ import {
   Trophy,
   Building2,
   BookOpen,
+  ArrowRight,
 } from 'lucide-react';
 
 interface ProgramDetailModalProps {
   program: Program | null;
+  profile?: UserProfile;
   onClose: () => void;
 }
 
-export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program, onClose }) => {
+export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({
+  program,
+  profile,
+  onClose,
+}) => {
   const [activeTab, setActiveTab] = useState<'about' | 'instructions' | 'campus'>('about');
   const [instructionSubTab, setInstructionSubTab] = useState<'scholarship' | 'paid' | 'other'>('scholarship');
 
@@ -27,13 +34,17 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-150">
       {/* Modal Container with Clean Duolingo Borders and Zero Fuzzy Shadows */}
-      <div className="bg-white rounded-3xl border-2 border-[#CADDF4] border-b-[6px] border-b-[#A8C6EB] w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-3xl border-2 border-[#CADDF4] border-b-[6px] border-b-[#A8C6EB] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Modal Header with Image Cover & Shadowed Gradient Background */}
         <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-900 shrink-0">
           <img
             src={program.imageUrl}
             alt={program.title}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop';
+            }}
           />
           {/* Shadowed Gradient Background Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/50 to-black/30" />
@@ -72,7 +83,7 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
         </div>
 
         {/* 3 Main Tabs Navigation */}
-        <div className="flex border-b-2 border-[#E2EEFC] bg-white px-5 sm:px-6 gap-2 pt-2">
+        <div className="flex border-b-2 border-[#E2EEFC] bg-white px-5 sm:px-6 gap-2 pt-2 shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('about')}
@@ -114,14 +125,169 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
           {/* TAB 1: О ПРОГРАММЕ */}
           {activeTab === 'about' && (
-            <div className="space-y-6 animate-in fade-in duration-150">
+            <div className="space-y-5 animate-in fade-in duration-150">
+              {/* Official University Program Page CTA */}
+              <a
+                href={program.officialProgramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center justify-between p-3.5 sm:p-4 bg-[#EFF6FF] border-2 border-[#1677FF] border-b-[4px] border-b-[#0A4EA8] rounded-2xl text-[#0E2E59] hover:bg-[#E0EFFF] active:translate-y-[1px] active:border-b-2 transition-all group select-none"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#1677FF] text-white flex items-center justify-center shrink-0">
+                    <ExternalLink className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-extrabold text-sm sm:text-base text-[#0E2E59] block truncate">
+                      Официальная страница программы на сайте вуза
+                    </span>
+                    <span className="text-xs text-[#1D4ED8] font-semibold truncate block">
+                      Перейти на сайт университета →
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="w-5 h-5 text-[#1677FF] shrink-0 ml-2 group-hover:translate-x-1 transition-transform" />
+              </a>
+
+              {/* Number of Places & Passing Scores (Moved to About Program tab) */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#355278] mb-2 flex items-center gap-1.5">
+                  <Building2 className="w-4 h-4 text-[#1677FF]" />
+                  Количество мест и проходные баллы
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#EFF6FF] border-2 border-[#BFDBFE] border-b-[4px] border-b-[#93C5FD] rounded-2xl p-3.5 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold uppercase text-[#1E40AF] block">
+                        Бюджетных мест
+                      </span>
+                      <span className="text-2xl sm:text-3xl font-black text-[#1E3A8A] block mt-0.5">
+                        {program.budgetPlaces}
+                      </span>
+                    </div>
+                    <span className="text-xs text-slate-500 font-semibold mt-2 pt-2 border-t border-blue-100">
+                      Проходной 2025: <b className="text-[#1E3A8A]">{program.budgetPassingScore}</b>
+                    </span>
+                  </div>
+
+                  <div className="bg-[#F0FDF4] border-2 border-[#BBF7D0] border-b-[4px] border-b-[#86EFAC] rounded-2xl p-3.5 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold uppercase text-[#166534] block">
+                        Платных мест
+                      </span>
+                      <span className="text-2xl sm:text-3xl font-black text-[#14532D] block mt-0.5">
+                        {program.paidPlaces}
+                      </span>
+                    </div>
+                    <span className="text-xs text-slate-500 font-semibold mt-2 pt-2 border-t border-green-100">
+                      Проходной 2025: <b className="text-[#14532D]">{program.paidPassingScore}</b>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Minimum Marks in Each Subject */}
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#355278] mb-2 flex items-center gap-1.5">
+                  <Award className="w-4 h-4 text-[#1677FF]" />
+                  Минимальные баллы ЕГЭ по предметам (для подачи документов)
+                </h3>
+                <div className="bg-[#F8FAFC] border-2 border-[#E2EEFC] rounded-2xl p-4">
+                  <p className="text-xs text-slate-500 mb-3">
+                    Пороговые баллы, установленные университетом. Документы принимаются только при достижении каждого порога:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* Primary subjects */}
+                    {program.requiredSubjects.primary.map((subId) => {
+                      const minVal = program.minSubjectScores[subId] ?? 60;
+                      const subInfo = EGE_SUBJECTS.find((s) => s.id === subId);
+                      const name = subInfo?.name || subId;
+                      const userScore = profile?.scores[subId];
+                      const meets = profile?.knowsScores && userScore !== undefined && userScore >= minVal;
+
+                      return (
+                        <div
+                          key={subId}
+                          className="bg-white border border-[#CADDF4] rounded-xl p-3 flex items-center justify-between"
+                        >
+                          <div className="min-w-0 pr-2">
+                            <span className="font-bold text-xs sm:text-sm text-[#0E2E59] block truncate">
+                              {name}
+                            </span>
+                            <span className="text-[11px] text-slate-400 font-medium">
+                              Минимум: <strong className="text-[#0E2E59]">{minVal} баллов</strong>
+                            </span>
+                          </div>
+
+                          {profile?.knowsScores && userScore !== undefined && (
+                            <span
+                              className={`px-2 py-1 rounded-lg text-xs font-black shrink-0 ${
+                                meets
+                                  ? 'bg-[#DCFCE7] text-[#166534] border border-[#86EFAC]'
+                                  : 'bg-[#FEE2E2] text-[#991B1B] border border-[#FECACA]'
+                              }`}
+                            >
+                              {userScore} {meets ? '✓' : '✗'}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Choice subjects */}
+                    {program.requiredSubjects.choice && program.requiredSubjects.choice.length > 0 && (
+                      <div className="bg-white border border-[#CADDF4] rounded-xl p-3 flex items-center justify-between sm:col-span-2">
+                        <div className="min-w-0 pr-2">
+                          <span className="font-bold text-xs sm:text-sm text-[#0E2E59] block">
+                            По выбору:{' '}
+                            {program.requiredSubjects.choice
+                              .map((id) => EGE_SUBJECTS.find((s) => s.id === id)?.name || id)
+                              .join(' ИЛИ ')}
+                          </span>
+                          <span className="text-[11px] text-slate-400 font-medium">
+                            Минимум:{' '}
+                            <strong className="text-[#0E2E59]">
+                              {program.minSubjectScores[program.requiredSubjects.choice[0]] ?? 60} баллов
+                            </strong>
+                          </span>
+                        </div>
+
+                        {profile?.knowsScores && (
+                          (() => {
+                            const choiceScores = program.requiredSubjects.choice
+                              .map((id) => profile.scores[id] || 0)
+                              .filter((score) => score > 0);
+                            if (choiceScores.length === 0) return null;
+                            const best = Math.max(...choiceScores);
+                            const minVal = program.minSubjectScores[program.requiredSubjects.choice[0]] ?? 60;
+                            const meets = best >= minVal;
+
+                            return (
+                              <span
+                                className={`px-2 py-1 rounded-lg text-xs font-black shrink-0 ${
+                                  meets
+                                    ? 'bg-[#DCFCE7] text-[#166534] border border-[#86EFAC]'
+                                    : 'bg-[#FEE2E2] text-[#991B1B] border border-[#FECACA]'
+                                }`}
+                              >
+                                {best} {meets ? '✓' : '✗'}
+                              </span>
+                            );
+                          })()
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Description */}
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#355278] mb-2 flex items-center gap-1.5">
                   <BookOpen className="w-4 h-4 text-[#1677FF]" />
                   Описание программы
                 </h3>
-                <p className="text-sm sm:text-base text-slate-700 leading-relaxed bg-[#F8FAFC] border-2 border-[#E2EEFC] rounded-2xl p-4">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-[#F8FAFC] border-2 border-[#E2EEFC] rounded-2xl p-4">
                   {program.description}
                 </p>
               </div>
@@ -133,7 +299,7 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
                     <MessageCircle className="w-5 h-5 fill-current" />
                   </div>
                   <div>
-                    <h4 className="font-extrabold text-base text-[#0E2E59]">
+                    <h4 className="font-extrabold text-sm sm:text-base text-[#0E2E59]">
                       Чат абитуриентов и студентов программы в VK
                     </h4>
                     <span className="text-xs text-[#1D4ED8] font-semibold">
@@ -163,7 +329,7 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
                   <MapPin className="w-4 h-4 text-[#1677FF]" />
                   О городе и студенческой жизни ({program.city})
                 </h3>
-                <p className="text-sm sm:text-base text-slate-700 leading-relaxed bg-[#F8FAFC] border-2 border-[#E2EEFC] rounded-2xl p-4">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed bg-[#F8FAFC] border-2 border-[#E2EEFC] rounded-2xl p-4">
                   {program.cityInfo}
                 </p>
               </div>
@@ -183,8 +349,8 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
                       rel="noopener noreferrer"
                       className="p-3 bg-white border-2 border-[#CADDF4] border-b-[3px] border-b-[#A8C6EB] hover:bg-slate-50 rounded-xl flex items-center justify-between text-xs sm:text-sm font-bold text-[#0E2E59] active:translate-y-[1px] active:border-b-2 transition-all select-none"
                     >
-                      <span>{link.label}</span>
-                      <ExternalLink className="w-4 h-4 text-slate-400 shrink-0 ml-2" />
+                      <span className="truncate pr-2">{link.label}</span>
+                      <ExternalLink className="w-4 h-4 text-slate-400 shrink-0" />
                     </a>
                   ))}
                 </div>
@@ -245,7 +411,7 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
                     Стипендии и гранты для программы
                   </h4>
                   <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto">
-                    Информация о повышенных академических стипендиях, именных грантах партнёров и условиях их получения будет заполнена в ближайшее время.
+                    Информация о повышенных академических стипендиях, именных грантах индустриальных партнёров и условиях их получения будет заполнена в ближайшее время.
                   </p>
                 </div>
               )}
@@ -278,7 +444,7 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
             </div>
           )}
 
-          {/* TAB 3: ВУЗ И КОНТАКТЫ */}
+          {/* TAB 3: ВУЗ И КОНТАКТЫ (Places moved to Tab 1) */}
           {activeTab === 'campus' && (
             <div className="space-y-4 animate-in fade-in duration-150">
               <div className="bg-[#F8FAFC] border-2 border-[#E2EEFC] rounded-2xl p-5">
@@ -292,16 +458,19 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({ program,
 
                 <div className="border-t border-slate-200 pt-3 flex flex-col gap-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Город кампуса:</span>
+                    <span className="text-slate-400">Город расположения:</span>
                     <span className="font-bold text-[#0E2E59]">{program.city}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Бюджетных мест:</span>
-                    <span className="font-bold text-[#0E2E59]">{program.budgetPlaces}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Платных мест:</span>
-                    <span className="font-bold text-[#0E2E59]">{program.paidPlaces}</span>
+                    <span className="text-slate-400">Официальный сайт программы:</span>
+                    <a
+                      href={program.officialProgramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-[#1677FF] hover:underline truncate max-w-[200px]"
+                    >
+                      {program.officialProgramUrl}
+                    </a>
                   </div>
                 </div>
               </div>

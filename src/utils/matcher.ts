@@ -4,6 +4,21 @@ import { EGE_SUBJECTS } from '../data/programs';
 export function matchPrograms(profile: UserProfile, programs: Program[]): ProgramMatchResult[] {
   const subjectNameMap = new Map(EGE_SUBJECTS.map((s) => [s.id, s.name]));
 
+  // If the user doesn't know their marks, show all programs cleanly without qualification filtering
+  if (!profile.knowsScores) {
+    return programs
+      .map((program) => ({
+        program,
+        userTotalScore: 0,
+        isEligible: true,
+        qualifiesBudget: false,
+        qualifiesPaid: false,
+        missingSubjects: [],
+        pointsToBudget: program.budgetPassingScore,
+      }))
+      .sort((a, b) => b.program.budgetPassingScore - a.program.budgetPassingScore);
+  }
+
   return programs.map((program) => {
     const missing: string[] = [];
     let subjectsScore = 0;
@@ -34,15 +49,6 @@ export function matchPrograms(profile: UserProfile, programs: Program[]): Progra
           ...validChoices.map((id) => profile.scores[id] || 0)
         );
         subjectsScore += bestChoiceScore;
-      }
-    }
-
-    // 3. Check creative exam (ДВИ)
-    if (program.requiresCreativeExam) {
-      if (!profile.creativeExam.taking || profile.creativeExam.score === 0) {
-        missing.push('Творческое испытание (ДВИ)');
-      } else {
-        subjectsScore += profile.creativeExam.score;
       }
     }
 

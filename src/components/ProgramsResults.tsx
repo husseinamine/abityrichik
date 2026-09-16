@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { UserProfile, Program } from '../types/onboarding';
-import { UNIVERSITY_PROGRAMS, CITIES_LIST } from '../data/programs';
+import { UNIVERSITY_PROGRAMS, CITIES_LIST, EGE_SUBJECTS } from '../data/programs';
 import { matchPrograms } from '../utils/matcher';
 import { DuolingoButton } from './DuolingoButton';
 import { ProgramDetailModal } from './ProgramDetailModal';
@@ -13,6 +13,7 @@ import {
   Search,
   MapPin,
   Building2,
+  ChevronRight,
 } from 'lucide-react';
 
 interface ProgramsResultsProps {
@@ -57,7 +58,9 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
       if (filterCategory === 'paid' && !m.qualifiesPaid) return false;
       if (
         filterCategory === 'it' &&
-        !m.program.tags.some((t) => ['IT', 'Data Science', 'Machine Learning', 'Архитектура ПО'].includes(t))
+        !m.program.tags.some((t) =>
+          ['IT', 'Data Science', 'Machine Learning', 'Архитектура ПО', 'Highload', 'AI'].includes(t)
+        )
       ) {
         return false;
       }
@@ -83,13 +86,12 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#F8FAFC] overflow-y-auto">
-      {/* Top Sticky Header Banner without specific university branding */}
+      {/* Top Sticky Header Banner */}
       <div className="sticky top-0 z-30 bg-white border-b-2 border-[#E2EEFC] px-3.5 sm:px-8 pt-3 pb-2.5 sm:py-4">
         <div className="max-w-6xl mx-auto w-full">
-          {/* Header Row: Icon + Title + Retake Button */}
+          {/* Header Row: Icon + Title + Retake / Enter Scores Button */}
           <div className="flex items-center justify-between gap-2.5 mb-2">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              {/* Sleek beautifully displayed Icon */}
               <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#EFF6FF] border-2 border-[#1677FF] border-b-[3px] border-b-[#0A4EA8] text-[#1677FF] flex items-center justify-center shrink-0">
                 <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
               </div>
@@ -103,43 +105,81 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               </div>
             </div>
 
-            {/* Compact Retake Button */}
+            {/* Retake / Enter Scores CTA Button */}
             <DuolingoButton
-              variant="secondary"
+              variant={profile.knowsScores ? 'secondary' : 'primary'}
               onClick={onRetake}
               className="!h-9 !px-3 !text-xs shrink-0 rounded-xl"
-              icon={<RotateCcw className="w-3.5 h-3.5" />}
+              icon={
+                profile.knowsScores ? (
+                  <RotateCcw className="w-3.5 h-3.5" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5" />
+                )
+              }
             >
-              Пересдать
+              {profile.knowsScores ? 'Пересдать' : 'Ввести баллы ЕГЭ'}
             </DuolingoButton>
           </div>
 
           {/* Compact Stats Strip */}
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            <div className="bg-[#EFF6FF] border-2 border-[#BFDBFE] border-b-[3px] border-b-[#93C5FD] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center justify-between min-w-0">
-              <div className="flex flex-col min-w-0">
-                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-[#1E40AF] truncate">
-                  На бюджет
-                </span>
-                <span className="text-sm sm:text-base font-black text-[#1E3A8A] truncate">
-                  {budgetCount} {budgetCount === 1 ? 'программа' : 'программ'}
-                </span>
+          {profile.knowsScores ? (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="bg-[#EFF6FF] border-2 border-[#BFDBFE] border-b-[3px] border-b-[#93C5FD] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center justify-between min-w-0">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-[#1E40AF] truncate">
+                    На бюджет
+                  </span>
+                  <span className="text-sm sm:text-base font-black text-[#1E3A8A] truncate">
+                    {budgetCount} {budgetCount === 1 ? 'программа' : 'программ'}
+                  </span>
+                </div>
+                <CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0 ml-1 opacity-80" />
               </div>
-              <CheckCircle2 className="w-4 h-4 text-[#2563EB] shrink-0 ml-1 opacity-80" />
-            </div>
 
-            <div className="bg-[#F0FDF4] border-2 border-[#BBF7D0] border-b-[3px] border-b-[#86EFAC] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center justify-between min-w-0">
-              <div className="flex flex-col min-w-0">
-                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-[#166534] truncate">
-                  На коммерцию
-                </span>
-                <span className="text-sm sm:text-base font-black text-[#14532D] truncate">
-                  {paidCount} {paidCount === 1 ? 'программа' : 'программ'}
-                </span>
+              <div className="bg-[#F0FDF4] border-2 border-[#BBF7D0] border-b-[3px] border-b-[#86EFAC] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center justify-between min-w-0">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-[#166534] truncate">
+                    На коммерцию
+                  </span>
+                  <span className="text-sm sm:text-base font-black text-[#14532D] truncate">
+                    {paidCount} {paidCount === 1 ? 'программа' : 'программ'}
+                  </span>
+                </div>
+                <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 ml-1 opacity-80" />
               </div>
-              <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0 ml-1 opacity-80" />
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="bg-[#EFF6FF] border-2 border-[#BFDBFE] border-b-[3px] border-b-[#93C5FD] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center justify-between min-w-0">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-[#1E40AF] truncate">
+                    В каталоге
+                  </span>
+                  <span className="text-sm sm:text-base font-black text-[#1E3A8A] truncate">
+                    {filteredMatches.length} {filteredMatches.length === 1 ? 'программа' : 'программ'}
+                  </span>
+                </div>
+                <Building2 className="w-4 h-4 text-[#2563EB] shrink-0 ml-1 opacity-80" />
+              </div>
+
+              <button
+                type="button"
+                onClick={onRetake}
+                className="bg-[#FFFBEB] border-2 border-[#FDE68A] border-b-[3px] border-b-[#FCD34D] rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex items-center justify-between min-w-0 text-left hover:bg-[#FEF3C7] active:translate-y-[1px] cursor-pointer transition-all"
+              >
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-[#92400E] truncate">
+                    Баллы ЕГЭ
+                  </span>
+                  <span className="text-xs sm:text-sm font-black text-[#78350F] truncate">
+                    Ввести для расчёта шансов →
+                  </span>
+                </div>
+                <Sparkles className="w-4 h-4 text-[#D97706] shrink-0 ml-1 opacity-80" />
+              </button>
+            </div>
+          )}
 
           {/* Search & Filters Section */}
           <div className="mt-2.5 flex flex-col gap-2">
@@ -190,7 +230,7 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               </div>
             </div>
 
-            {/* Filter Pills: ONE LINE ONLY, COMPACT, NEVER WRAP */}
+            {/* Filter Pills: ONE LINE ONLY, COMPACT */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs flex-nowrap">
               <button
                 type="button"
@@ -203,28 +243,34 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
               >
                 Все ({filteredMatches.length})
               </button>
-              <button
-                type="button"
-                onClick={() => setFilterCategory('budget')}
-                className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                  filterCategory === 'budget'
-                    ? 'bg-[#1677FF] text-white border-b-2 border-[#0A4EA8]'
-                    : 'bg-white text-slate-600 border border-[#D0E0F2]'
-                }`}
-              >
-                Бюджет ({budgetCount})
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterCategory('paid')}
-                className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                  filterCategory === 'paid'
-                    ? 'bg-[#1677FF] text-white border-b-2 border-[#0A4EA8]'
-                    : 'bg-white text-slate-600 border border-[#D0E0F2]'
-                }`}
-              >
-                Коммерция ({paidCount})
-              </button>
+
+              {profile.knowsScores && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setFilterCategory('budget')}
+                    className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                      filterCategory === 'budget'
+                        ? 'bg-[#1677FF] text-white border-b-2 border-[#0A4EA8]'
+                        : 'bg-white text-slate-600 border border-[#D0E0F2]'
+                    }`}
+                  >
+                    Бюджет ({budgetCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilterCategory('paid')}
+                    className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                      filterCategory === 'paid'
+                        ? 'bg-[#1677FF] text-white border-b-2 border-[#0A4EA8]'
+                        : 'bg-white text-slate-600 border border-[#D0E0F2]'
+                    }`}
+                  >
+                    Коммерция ({paidCount})
+                  </button>
+                </>
+              )}
+
               <button
                 type="button"
                 onClick={() => setFilterCategory('it')}
@@ -285,12 +331,16 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
                     className="bg-white border-2 border-[#D3E2F4] border-b-[5px] border-b-[#BACEE5] hover:border-[#1677FF] hover:border-b-[#0A4EA8] rounded-2xl overflow-hidden flex flex-col justify-between cursor-pointer active:translate-y-[2px] transition-all group"
                   >
                     {/* Card Image Banner with Shadowed Gradient Background */}
-                    <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-200">
+                    <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-900">
                       <img
                         src={program.imageUrl}
                         alt={program.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src =
+                            'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop';
+                        }}
                       />
                       {/* Shadowed Gradient Background Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-black/25" />
@@ -319,107 +369,171 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({ profile, onRet
 
                     {/* Card Content Body */}
                     <div className="p-4 flex flex-col justify-between gap-3 flex-1">
-
-                    {/* Admission Status Badge */}
-                    {missingSubjects.length > 0 ? (
-                      <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-bold text-[#991B1B]">
-                        <AlertCircle className="w-4 h-4 shrink-0" />
-                        <span>Нужно сдать: {missingSubjects.join(', ')}</span>
-                      </div>
-                    ) : qualifiesBudget ? (
-                      <div className="bg-[#F0FDF4] border border-[#86EFAC] rounded-xl px-3 py-2 flex items-center justify-between text-xs font-bold text-[#166534]">
-                        <div className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
-                          <span>Проходишь на бюджет!</span>
-                        </div>
-                        <span>
-                          {userTotalScore} из {program.budgetPassingScore}
-                        </span>
-                      </div>
-                    ) : pointsToBudget <= 15 ? (
-                      <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-xl px-3 py-2 flex items-center justify-between text-xs font-bold text-[#92400E]">
-                        <div className="flex items-center gap-1.5">
-                          <Sparkles className="w-4 h-4 text-[#F59E0B]" />
-                          <span>Высокие шансы (до бюджета {pointsToBudget} б.)</span>
-                        </div>
-                        <span>
-                          {userTotalScore} из {program.budgetPassingScore}
-                        </span>
-                      </div>
-                    ) : qualifiesPaid ? (
-                      <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl px-3 py-2 flex items-center justify-between text-xs font-bold text-[#1E40AF]">
-                        <div className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-[#3B82F6]" />
-                          <span>Проходишь на коммерцию</span>
-                        </div>
-                        <span>
-                          {userTotalScore} из {program.paidPassingScore}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between text-xs font-semibold text-slate-500">
-                        <span>Не хватает баллов</span>
-                        <span>
-                          {userTotalScore} из {program.budgetPassingScore}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Places & Cutoffs breakdown */}
-                    <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-100">
-                      <div className="flex flex-col">
-                        <span className="text-[11px] text-slate-400">Бюджетных мест:</span>
-                        <span className="font-bold text-[#0E2E59]">
-                          {program.budgetPlaces} мест (проходной: {program.budgetPassingScore})
-                        </span>
-                      </div>
-
-                      <div className="flex flex-col">
-                        <span className="text-[11px] text-slate-400">Платное обучение:</span>
-                        <span className="font-bold text-[#0E2E59]">
-                          {program.paidPlaces} мест (проходной: {program.paidPassingScore})
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Tags & Action prompt */}
-                    <div className="flex items-center justify-between pt-1 text-[11px]">
-                      <div className="flex flex-wrap gap-1">
-                        {program.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="px-2 py-0.5 rounded-md bg-slate-100 text-[10px] font-bold text-slate-500"
-                          >
-                            #{tag}
+                      {/* Admission Status Badge */}
+                      {!profile.knowsScores ? (
+                        <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl px-3 py-2 flex items-center justify-between text-xs font-bold text-[#1E40AF]">
+                          <div className="flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+                            <span>Проходные 2025</span>
+                          </div>
+                          <span className="text-[11px] font-extrabold">
+                            Бюджет: {program.budgetPassingScore} · Платно: {program.paidPassingScore}
                           </span>
-                        ))}
+                        </div>
+                      ) : missingSubjects.length > 0 ? (
+                        <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-bold text-[#991B1B]">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <span className="truncate">Нужно сдать: {missingSubjects.join(', ')}</span>
+                        </div>
+                      ) : qualifiesBudget ? (
+                        <div className="bg-[#F0FDF4] border border-[#86EFAC] rounded-xl px-3 py-2 flex items-center justify-between text-xs font-bold text-[#166534]">
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                            <span>Проходишь на бюджет!</span>
+                          </div>
+                          <span>
+                            {userTotalScore} из {program.budgetPassingScore}
+                          </span>
+                        </div>
+                      ) : pointsToBudget <= 15 ? (
+                        <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-xl px-3 py-2 flex items-center justify-between text-xs font-bold text-[#92400E]">
+                          <div className="flex items-center gap-1.5">
+                            <Sparkles className="w-4 h-4 text-[#F59E0B]" />
+                            <span>Высокие шансы (до бюджета {pointsToBudget} б.)</span>
+                          </div>
+                          <span>
+                            {userTotalScore} из {program.budgetPassingScore}
+                          </span>
+                        </div>
+                      ) : qualifiesPaid ? (
+                        <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl px-3 py-2 flex items-center justify-between text-xs font-bold text-[#1E40AF]">
+                          <div className="flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-[#3B82F6]" />
+                            <span>Проходишь на коммерцию</span>
+                          </div>
+                          <span>
+                            {userTotalScore} из {program.paidPassingScore}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 flex items-center justify-between text-xs font-semibold text-slate-500">
+                          <span>Не хватает баллов</span>
+                          <span>
+                            {userTotalScore} из {program.budgetPassingScore}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Minimized Minimum Marks per Subject on Card */}
+                      <div className="bg-[#F8FAFC] border border-[#E2EEFC] rounded-xl px-2.5 py-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                        <span className="font-extrabold text-slate-400 uppercase text-[9px] tracking-wider shrink-0">
+                          Мин. порог:
+                        </span>
+                        <div className="flex flex-wrap items-center gap-1">
+                          {program.requiredSubjects.primary.map((subId) => {
+                            const minVal = program.minSubjectScores[subId] ?? 60;
+                            const subInfo = EGE_SUBJECTS.find((s) => s.id === subId);
+                            const label = subInfo?.shortName || subId;
+                            const userScore = profile.scores[subId];
+                            const hasPassed =
+                              profile.knowsScores && userScore !== undefined && userScore >= minVal;
+
+                            return (
+                              <span
+                                key={subId}
+                                className={`px-1.5 py-0.5 rounded-md font-bold text-[10px] border flex items-center gap-0.5 ${
+                                  hasPassed
+                                    ? 'bg-[#F0FDF4] border-[#86EFAC] text-[#166534]'
+                                    : 'bg-white border-[#CADDF4] text-[#0E2E59]'
+                                }`}
+                              >
+                                <span>{label}</span>
+                                <span className="text-slate-400 font-normal">≥</span>
+                                <span>{minVal}</span>
+                              </span>
+                            );
+                          })}
+
+                          {program.requiredSubjects.choice &&
+                            program.requiredSubjects.choice.length > 0 &&
+                            (() => {
+                              const choiceLabels = program.requiredSubjects.choice
+                                .map((id) => EGE_SUBJECTS.find((s) => s.id === id)?.shortName || id)
+                                .join('/');
+                              const firstChoiceId = program.requiredSubjects.choice[0];
+                              const minVal = program.minSubjectScores[firstChoiceId] ?? 60;
+                              const choiceScores = program.requiredSubjects.choice
+                                .map((id) => profile.scores[id] || 0)
+                                .filter((s) => s > 0);
+                              const hasPassed =
+                                profile.knowsScores &&
+                                choiceScores.length > 0 &&
+                                Math.max(...choiceScores) >= minVal;
+
+                              return (
+                                <span
+                                  className={`px-1.5 py-0.5 rounded-md font-bold text-[10px] border flex items-center gap-0.5 ${
+                                    hasPassed
+                                      ? 'bg-[#F0FDF4] border-[#86EFAC] text-[#166534]'
+                                      : 'bg-white border-[#CADDF4] text-[#0E2E59]'
+                                  }`}
+                                >
+                                  <span>{choiceLabels}</span>
+                                  <span className="text-slate-400 font-normal">≥</span>
+                                  <span>{minVal}</span>
+                                </span>
+                              );
+                            })()}
+                        </div>
                       </div>
-                      <span className="text-[#1677FF] font-bold">Подробнее →</span>
+
+                      {/* Places & Cutoffs breakdown */}
+                      <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-slate-100">
+                        <div className="flex flex-col">
+                          <span className="text-[11px] text-slate-400">Бюджетных мест:</span>
+                          <span className="font-bold text-[#0E2E59]">
+                            {program.budgetPlaces} мест (проходной: {program.budgetPassingScore})
+                          </span>
+                        </div>
+
+                        <div className="flex flex-col">
+                          <span className="text-[11px] text-slate-400">Платное обучение:</span>
+                          <span className="font-bold text-[#0E2E59]">
+                            {program.paidPlaces} мест (проходной: {program.paidPassingScore})
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Tags & Action prompt */}
+                      <div className="flex items-center justify-between pt-1 text-[11px]">
+                        <div className="flex flex-wrap gap-1">
+                          {program.tags.slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              className="px-2 py-0.5 rounded-md bg-slate-100 font-bold text-slate-600 text-[10px]"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+
+                        <span className="text-[#1677FF] font-bold flex items-center gap-0.5 group-hover:translate-x-1 transition-transform">
+                          Подробнее <ChevronRight className="w-3.5 h-3.5" />
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            }
-          )}
-        </div>
-      )}
-
-        {/* Retake Button at bottom */}
-        <div className="pt-2 pb-8 max-w-md mx-auto w-full">
-          <DuolingoButton
-            variant="secondary"
-            onClick={onRetake}
-            className="w-full"
-            icon={<RotateCcw className="w-4 h-4" />}
-          >
-            Пересдать тест / Изменить баллы
-          </DuolingoButton>
-        </div>
+                );
+              }
+            )}
+          </div>
+        )}
       </div>
 
-      {/* 3-Tab Detailed Modal */}
+      {/* Program Detail Modal */}
       <ProgramDetailModal
         program={activeModalProgram}
+        profile={profile}
         onClose={() => setActiveModalProgram(null)}
       />
     </div>

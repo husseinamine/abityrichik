@@ -3,6 +3,7 @@ import { HeaderProgress } from './components/HeaderProgress';
 import { WelcomeStep } from './components/steps/WelcomeStep';
 import { NameStep } from './components/steps/NameStep';
 import { CityStep } from './components/steps/CityStep';
+import { KnowsScoresStep } from './components/steps/KnowsScoresStep';
 import { SubjectStep } from './components/steps/SubjectStep';
 import { ScoresStep } from './components/steps/ScoresStep';
 import { AchievementsStep } from './components/steps/AchievementsStep';
@@ -10,7 +11,7 @@ import { ProgramsResults } from './components/ProgramsResults';
 import type { UserProfile, SubjectId } from './types/onboarding';
 import { loadUserProfile, saveUserProfile, DEFAULT_PROFILE } from './utils/storage';
 
-const TOTAL_ONBOARDING_STEPS = 6;
+const TOTAL_ONBOARDING_STEPS = 7;
 
 export function App() {
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
@@ -20,9 +21,9 @@ export function App() {
   // Initialize from localStorage
   useEffect(() => {
     const saved = loadUserProfile();
-    if (saved && saved.name && saved.selectedSubjects.length > 0) {
+    if (saved && saved.name) {
       setProfile(saved);
-      // If user has saved profile, take them directly to results
+      // If user has saved profile with name, take them directly to results
       setView('results');
     }
   }, []);
@@ -39,15 +40,33 @@ export function App() {
     }
   };
 
+  // Step 4 Decision: User knows their marks or not
+  const handleSelectKnowsScores = (knows: boolean) => {
+    const updated = { ...profile, knowsScores: knows };
+    setProfile(updated);
+
+    if (!knows) {
+      // User doesn't know scores: skip marks questions, immediately go to results
+      saveUserProfile(updated);
+      setView('results');
+    } else {
+      // User knows scores: proceed to subjects step
+      setCurrentStepIndex(4);
+    }
+  };
+
   const handleFinishOnboarding = () => {
-    saveUserProfile(profile);
+    const updated = { ...profile, knowsScores: true };
+    setProfile(updated);
+    saveUserProfile(updated);
     setView('results');
   };
 
   const handleRetake = () => {
-    // Return to onboarding to edit scores, starting at Name
+    // Return to onboarding to enter/edit scores
+    setProfile((prev) => ({ ...prev, knowsScores: true }));
     setView('onboarding');
-    setCurrentStepIndex(1);
+    setCurrentStepIndex(4); // Jump straight to subjects selection
   };
 
   // State update helpers
@@ -94,13 +113,9 @@ export function App() {
     setProfile((prev) => ({ ...prev, achievements }));
   };
 
-  const handleChangeCreativeExam = (creativeExam: { taking: boolean; score: number }) => {
-    setProfile((prev) => ({ ...prev, creativeExam }));
-  };
-
   return (
     <div className="h-screen h-[100dvh] min-h-screen w-full bg-white flex flex-col justify-between overflow-hidden select-none">
-      <div className="w-full max-w-6xl mx-auto flex-1 flex flex-col justify-between h-full">
+      <div className="w-full mx-auto flex-1 flex flex-col justify-between h-full">
         {view === 'results' ? (
           <ProgramsResults profile={profile} onRetake={handleRetake} />
         ) : (
@@ -113,12 +128,12 @@ export function App() {
               canGoBack={currentStepIndex > 0}
             />
 
-            {/* Step 1: Welcome */}
+            {/* Step 1 (Index 0): Welcome */}
             {currentStepIndex === 0 && (
               <WelcomeStep onNext={handleNext} />
             )}
 
-            {/* Step 2: User Name */}
+            {/* Step 2 (Index 1): User Name */}
             {currentStepIndex === 1 && (
               <NameStep
                 name={profile.name}
@@ -127,7 +142,7 @@ export function App() {
               />
             )}
 
-            {/* Step 3: Preferred City */}
+            {/* Step 3 (Index 2): Preferred City */}
             {currentStepIndex === 2 && (
               <CityStep
                 userName={profile.name}
@@ -138,19 +153,28 @@ export function App() {
               />
             )}
 
-            {/* Step 4: EGE Subjects */}
+            {/* Step 4 (Index 3): Knows ЕГЭ Scores? */}
             {currentStepIndex === 3 && (
+              <KnowsScoresStep
+                userName={profile.name}
+                onSelectKnowsScores={handleSelectKnowsScores}
+                onBack={handleBack}
+              />
+            )}
+
+            {/* Step 5 (Index 4): EGE Subjects */}
+            {currentStepIndex === 4 && (
               <SubjectStep
                 userName={profile.name}
                 selectedSubjects={profile.selectedSubjects}
                 onToggleSubject={handleToggleSubject}
                 onNext={handleNext}
-                onBack={handleBack}
+                onBack={() => setCurrentStepIndex(3)}
               />
             )}
 
-            {/* Step 5: Subject Scores */}
-            {currentStepIndex === 4 && (
+            {/* Step 6 (Index 5): Subject Scores */}
+            {currentStepIndex === 5 && (
               <ScoresStep
                 userName={profile.name}
                 selectedSubjects={profile.selectedSubjects}
@@ -161,14 +185,12 @@ export function App() {
               />
             )}
 
-            {/* Step 6: Individual Achievements & Creative Exam */}
-            {currentStepIndex === 5 && (
+            {/* Step 7 (Index 6): Individual Achievements */}
+            {currentStepIndex === 6 && (
               <AchievementsStep
                 userName={profile.name}
                 achievements={profile.achievements}
-                creativeExam={profile.creativeExam}
                 onChangeAchievements={handleChangeAchievements}
-                onChangeCreativeExam={handleChangeCreativeExam}
                 onSubmit={handleFinishOnboarding}
                 onBack={handleBack}
               />
