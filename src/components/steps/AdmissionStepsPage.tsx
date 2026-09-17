@@ -22,6 +22,11 @@ import {
   Clock,
   Sparkles,
   Check,
+  Compass,
+  Layers,
+  ListOrdered,
+  Info,
+  AlertTriangle,
 } from "lucide-react";
 
 export type AdmissionTabMode = "steps" | "plain" | "official";
@@ -492,29 +497,189 @@ export const AdmissionStepsPage: React.FC<AdmissionStepsPageProps> = ({
             {PLAIN_TEXT_GUIDE.sections.map((sec, sIdx) => (
               <div
                 key={sIdx}
-                className="bg-white rounded-2xl border-2 border-slate-200 p-5 sm:p-6 shadow-2xs space-y-3"
+                className="bg-white rounded-3xl border-2 border-slate-200 border-b-[4px] border-b-slate-300 p-5 sm:p-7 shadow-2xs space-y-4"
               >
-                <h3 className="text-base sm:text-lg font-black text-[#0E2E59]">
+                {/* Step Badge */}
+                {sec.stepBadge && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFF6FF] text-[#1677FF] border border-[#BFDBFE] text-xs font-black uppercase tracking-wider">
+                    <Compass className="w-3.5 h-3.5" />
+                    <span>{sec.stepBadge}</span>
+                  </div>
+                )}
+
+                <h3 className="text-base sm:text-xl font-black text-[#0E2E59] leading-tight">
                   {sec.heading}
                 </h3>
 
+                {/* Paragraphs */}
+                {sec.paragraphs && sec.paragraphs.length > 0 && (
+                  <div className="space-y-2.5">
+                    {sec.paragraphs.map((p, pIdx) => (
+                      <p
+                        key={pIdx}
+                        className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed"
+                      >
+                        {p}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {/* Legacy / Single content fallback */}
                 {sec.content && (
                   <p className="text-xs sm:text-sm text-slate-700 font-medium leading-relaxed">
                     {sec.content}
                   </p>
                 )}
 
+                {/* Custom Directions & Programs Example Card */}
+                {sec.directionsExample && (
+                  <div className="bg-[#F8FAFC] rounded-2xl border-2 border-[#D3E2F4] p-4 sm:p-5 space-y-3.5 mt-2">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-black text-[#0E2E59]">
+                      <Layers className="w-4 h-4 text-[#1677FF] shrink-0" />
+                      <span>{sec.directionsExample.title}</span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {sec.directionsExample.directions.map((dir) => (
+                        <div
+                          key={dir.number}
+                          className="bg-white rounded-xl border border-slate-200 p-3 sm:p-3.5 shadow-2xs space-y-1.5"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-full bg-[#1677FF] text-white text-[11px] font-black flex items-center justify-center shrink-0">
+                              {dir.number}
+                            </span>
+                            <span className="font-extrabold text-xs sm:text-sm text-[#0E2E59]">
+                              {dir.directionTitle}
+                            </span>
+                          </div>
+                          <div className="pl-7 space-y-1">
+                            {dir.programs.map((prog, prIdx) => (
+                              <div
+                                key={prIdx}
+                                className="flex items-center gap-1.5 text-xs text-slate-600 font-medium"
+                              >
+                                <span className="text-blue-500 font-bold">•</span>
+                                <span>{prog}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-[#EFF6FF] border-2 border-[#BFDBFE] text-xs sm:text-sm font-black text-[#1D4ED8] flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+                      <span>{sec.directionsExample.summary}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Custom Priorities Explanation Box */}
+                {sec.prioritiesExplanation && (
+                  <div className="bg-[#FFFBEB] rounded-2xl border-2 border-[#FDE68A] p-4 sm:p-5 space-y-3 mt-2">
+                    <h4 className="text-sm sm:text-base font-black text-[#92400E] flex items-center gap-2">
+                      <ListOrdered className="w-4 h-4 text-[#D97706] shrink-0" />
+                      <span>{sec.prioritiesExplanation.title}</span>
+                    </h4>
+                    <p className="text-xs sm:text-sm text-amber-950 font-medium leading-relaxed">
+                      {sec.prioritiesExplanation.text}
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {sec.prioritiesExplanation.examples.map((ex, exIdx) => (
+                        <div
+                          key={exIdx}
+                          className="p-3 bg-white rounded-xl border border-amber-200 text-xs shadow-2xs space-y-0.5"
+                        >
+                          <span className="font-black text-[#92400E] block">{ex.uni}:</span>
+                          <span className="font-bold text-slate-700">{ex.note}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-[#92400E] font-bold italic pt-1">
+                      {sec.prioritiesExplanation.conclusion}
+                    </p>
+                  </div>
+                )}
+
+                {/* Custom Remember Rule Box */}
+                {sec.rememberRule && (
+                  <div className="bg-[#F0FDF4] rounded-2xl border-2 border-[#86EFAC] p-4 sm:p-5 space-y-2.5 mt-2">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-black text-[#166534]">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{sec.rememberRule.title}</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {sec.rememberRule.items.map((it, itIdx) => (
+                        <div
+                          key={itIdx}
+                          className="bg-white rounded-xl border border-emerald-200 p-3 text-xs shadow-2xs space-y-1"
+                        >
+                          <span className="font-black text-[#166534] block text-xs sm:text-sm">
+                            {it.term}
+                          </span>
+                          <span className="text-slate-600 font-medium leading-tight block text-[11px] sm:text-xs">
+                            → {it.desc}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Custom Alert Box */}
+                {sec.alertBox && (
+                  <div
+                    className={`p-4 rounded-2xl border-2 flex items-start gap-3 mt-2 ${
+                      sec.alertBox.type === "warning"
+                        ? "bg-rose-50 border-rose-200 text-rose-900"
+                        : "bg-amber-50 border-amber-200 text-amber-900"
+                    }`}
+                  >
+                    {sec.alertBox.type === "warning" ? (
+                      <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                    ) : (
+                      <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    )}
+                    <div className="space-y-1 min-w-0">
+                      <h5 className="font-black text-xs sm:text-sm">{sec.alertBox.title}</h5>
+                      <p className="text-xs sm:text-sm font-medium leading-relaxed">
+                        {sec.alertBox.text}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Custom Nuance Box */}
+                {sec.nuanceBox && (
+                  <div className="p-4 rounded-2xl bg-[#EFF6FF] border-2 border-[#BFDBFE] text-blue-950 flex items-start gap-3 mt-2">
+                    <Info className="w-5 h-5 text-[#1677FF] shrink-0 mt-0.5" />
+                    <div className="space-y-1 min-w-0">
+                      <h5 className="font-black text-xs sm:text-sm text-[#1D4ED8]">
+                        {sec.nuanceBox.title}
+                      </h5>
+                      <p className="text-xs sm:text-sm font-medium leading-relaxed text-slate-700">
+                        {sec.nuanceBox.text}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bullet Points */}
                 {sec.bulletPoints && (
                   <ul className="space-y-2 mt-2">
                     {sec.bulletPoints.map((bp, bIdx) => (
                       <li
                         key={bIdx}
-                        className="text-xs sm:text-sm text-slate-700 font-medium flex items-start gap-2"
+                        className="text-xs sm:text-sm text-slate-700 font-medium flex items-start gap-2.5"
                       >
-                        <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-700 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                          ★
+                        <span className="w-5 h-5 rounded-full bg-blue-100 text-[#1677FF] font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                          ✓
                         </span>
-                        <span>{bp}</span>
+                        <span className="leading-relaxed">{bp}</span>
                       </li>
                     ))}
                   </ul>
