@@ -307,7 +307,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
                 Есть идеи? Свяжитесь с нами
               </span>
               <span className="text-xs text-slate-400 font-semibold select-all pointer-events-none cursor-default block">
-                contact@uni-aggregator.ru
+                contact@sova.ru
               </span>
             </div>
 
