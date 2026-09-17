@@ -1,14 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import type { UserProfile, Program } from '../types/onboarding';
 import { UNIVERSITY_PROGRAMS, CITIES_LIST, EGE_SUBJECTS } from '../data/programs';
 import { matchPrograms } from '../utils/matcher';
 import { DuolingoButton } from './DuolingoButton';
 import { ProgramDetailModal } from './ProgramDetailModal';
 import { SideMenu } from './SideMenu';
+import { InteractiveOwlAvatar, type LookDirection } from './InteractiveOwlAvatar';
 import {
   CheckCircle2,
   AlertCircle,
-  GraduationCap,
   Sparkles,
   Search,
   MapPin,
@@ -47,6 +47,52 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
   const [activeModalProgram, setActiveModalProgram] = useState<Program | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState<boolean>(false);
+  const [lookDirection, setLookDirection] = useState<LookDirection>('neutral');
+  const prevScrollTopRef = useRef<number>(0);
+  const scrollTimeoutRef = useRef<number | null>(null);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const currentScrollTop = e.currentTarget.scrollTop;
+    const delta = currentScrollTop - prevScrollTopRef.current;
+
+    if (Math.abs(delta) > 3) {
+      setLookDirection(delta > 0 ? 'down' : 'up');
+      prevScrollTopRef.current = currentScrollTop;
+
+      if (scrollTimeoutRef.current) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = window.setTimeout(() => {
+        setLookDirection('neutral');
+      }, 700);
+    }
+  };
+
+  useEffect(() => {
+    const handleWindowScroll = () => {
+      const currentScrollTop = window.scrollY || document.documentElement.scrollTop;
+      const delta = currentScrollTop - prevScrollTopRef.current;
+      if (Math.abs(delta) > 3) {
+        setLookDirection(delta > 0 ? 'down' : 'up');
+        prevScrollTopRef.current = currentScrollTop;
+
+        if (scrollTimeoutRef.current) {
+          window.clearTimeout(scrollTimeoutRef.current);
+        }
+        scrollTimeoutRef.current = window.setTimeout(() => {
+          setLookDirection('neutral');
+        }, 700);
+      }
+    };
+
+    window.addEventListener('scroll', handleWindowScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleWindowScroll);
+      if (scrollTimeoutRef.current) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const displayName = profile.name.trim() || 'Абитуриент';
 
@@ -120,7 +166,10 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
   const paidCount = filteredMatches.filter((m) => m.qualifiesPaid).length;
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#F8FAFC] overflow-y-auto relative pb-20">
+    <div
+      onScroll={handleScroll}
+      className="flex-1 flex flex-col h-full bg-[#F8FAFC] overflow-y-auto relative pb-20"
+    >
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-[#0E2E59] text-white px-4 py-2.5 rounded-2xl shadow-xl border border-blue-400/30 text-xs sm:text-sm font-bold animate-in fade-in slide-in-from-top-3 duration-200 flex items-center gap-2">
@@ -135,15 +184,16 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
           {/* Header Row: Title & Subtitle + Burger Menu Button */}
           <div className="flex items-center justify-between gap-2.5 mb-2">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#EFF6FF] border-2 border-[#1677FF] border-b-[3px] border-b-[#0A4EA8] text-[#1677FF] flex items-center justify-center shrink-0">
-                <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
-              </div>
+              <InteractiveOwlAvatar
+                lookDirection={lookDirection}
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#EFF6FF] border-2 border-[#1677FF] border-b-[3px] border-b-[#0A4EA8] shrink-0 shadow-2xs"
+              />
               <div className="min-w-0 flex-1">
                 <h1 className="text-base sm:text-xl font-black text-[#0E2A54] leading-tight truncate">
                   Привет, {displayName}!
                 </h1>
                 <p className="text-[11px] sm:text-xs text-slate-400 font-semibold truncate">
-                  Твои программы • Агрегатор вузов России
+                  Твои программы • СОВА — Сайт Образовательного Выбора Абитуриента
                 </p>
               </div>
             </div>

@@ -213,13 +213,15 @@ export function App() {
           />
         ) : (
           <>
-            {/* Top Enlarged Progress Header */}
-            <HeaderProgress
-              currentStep={currentStepIndex + 1}
-              totalSteps={TOTAL_ONBOARDING_STEPS}
-              onBack={handleBack}
-              canGoBack={currentStepIndex > 0}
-            />
+            {/* Top Progress Header (questionnaire steps 1-6) */}
+            {currentStepIndex > 0 && (
+              <HeaderProgress
+                currentStep={currentStepIndex}
+                totalSteps={TOTAL_ONBOARDING_STEPS - 1}
+                onBack={handleBack}
+                canGoBack={currentStepIndex > 0}
+              />
+            )}
 
             {/* Step 1 (Index 0): Welcome */}
             {currentStepIndex === 0 && (

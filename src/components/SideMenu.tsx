@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import type { UserProfile } from "../types/onboarding";
 import { CITIES_LIST } from "../data/programs";
 import { AcademicOwl } from "./AcademicOwl";
+import { InteractiveOwlAvatar } from "./InteractiveOwlAvatar";
 import {
   X,
   User,
@@ -107,9 +108,10 @@ export const SideMenu: React.FC<SideMenuProps> = ({
             {/* Header with User Info & Close Button */}
             <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-10 h-10 rounded-2xl bg-[#EFF6FF] border-2 border-[#1677FF] border-b-[3px] border-b-[#0A4EA8] text-[#1677FF] flex items-center justify-center shrink-0">
-                  <GraduationCap className="w-5 h-5 stroke-[2.5]" />
-                </div>
+                <InteractiveOwlAvatar
+                  lookDirection="neutral"
+                  className="w-10 h-10 rounded-2xl bg-[#EFF6FF] border-2 border-[#1677FF] border-b-[3px] border-b-[#0A4EA8] shrink-0 shadow-2xs"
+                />
                 <div className="min-w-0">
                   <h3 className="font-black text-sm sm:text-base text-[#0E2E59] truncate leading-tight">
                     Привет, {displayName}!
@@ -262,7 +264,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
             </div>
 
             <p className="text-[10px] text-slate-400 font-semibold pt-1">
-              Агрегатор программ вузов России • 2026
+              СОВА — Сайт Образовательного Выбора Абитуриента
             </p>
           </div>
         </div>

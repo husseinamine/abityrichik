@@ -1,6 +1,6 @@
 import React from "react";
 
-export type OwlVariant = "explaining" | "happy" | "reading" | "pointing" | "compact";
+export type OwlVariant = "explaining" | "happy" | "reading" | "pointing" | "compact" | "waving";
 export type OwlSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface AcademicOwlProps {
@@ -102,7 +102,20 @@ export const AcademicOwl: React.FC<AcademicOwlProps> = ({
         )}
 
         {/* Right Wing according to variant */}
-        {variant === "explaining" || variant === "pointing" ? (
+        {variant === "waving" ? (
+          /* Cheerful waving wing with motion lines */
+          <g>
+            <path
+              d="M116 88 C128 70 144 52 154 42 C150 60 142 88 120 112 Z"
+              fill="#2563EB"
+              stroke="#1D4ED8"
+              strokeWidth="2"
+            />
+            {/* Friendly waving motion lines */}
+            <path d="M148 30 C158 38 158 50 148 58" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+            <path d="M154 24 C166 34 166 56 154 66" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+          </g>
+        ) : variant === "explaining" || variant === "pointing" ? (
           /* Wing Pointing / Gesturing up and to the right */
           <g>
             <path
