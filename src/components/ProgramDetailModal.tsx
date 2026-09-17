@@ -4,6 +4,7 @@ import { EGE_SUBJECTS } from '../data/programs';
 import { DuolingoButton } from './DuolingoButton';
 import {
   X,
+  Heart,
   MessageCircle,
   MapPin,
   ExternalLink,
@@ -18,12 +19,16 @@ import {
 interface ProgramDetailModalProps {
   program: Program | null;
   profile?: UserProfile;
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: string) => void;
   onClose: () => void;
 }
 
 export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({
   program,
   profile,
+  isFavorite = false,
+  onToggleFavorite,
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<'about' | 'instructions' | 'campus'>('about');
@@ -61,14 +66,35 @@ export const ProgramDetailModal: React.FC<ProgramDetailModalProps> = ({
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md border border-white/30 flex items-center justify-center text-slate-800 hover:bg-white active:scale-95 cursor-pointer shrink-0"
-              aria-label="Закрыть"
-            >
-              <X className="w-5 h-5 stroke-[2.5]" />
-            </button>
+            <div className="flex items-center gap-2">
+              {onToggleFavorite && (
+                <button
+                  type="button"
+                  onClick={() => onToggleFavorite(program.id)}
+                  className={`w-9 h-9 rounded-xl backdrop-blur-md border flex items-center justify-center transition-all active:scale-90 cursor-pointer shrink-0 ${
+                    isFavorite
+                      ? 'bg-rose-500 text-white border-rose-400 shadow-sm'
+                      : 'bg-white/90 text-slate-700 hover:text-rose-500 border-white/30 hover:bg-white'
+                  }`}
+                  title={isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'}
+                  aria-label={isFavorite ? 'Удалить из избранного' : 'Добавить в избранное'}
+                >
+                  <Heart
+                    className={`w-4 h-4 transition-transform ${
+                      isFavorite ? 'fill-white stroke-white scale-110' : 'stroke-[2.2]'
+                    }`}
+                  />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-9 h-9 rounded-xl bg-white/90 backdrop-blur-md border border-white/30 flex items-center justify-center text-slate-800 hover:bg-white active:scale-95 cursor-pointer shrink-0"
+                aria-label="Закрыть"
+              >
+                <X className="w-5 h-5 stroke-[2.5]" />
+              </button>
+            </div>
           </div>
 
           {/* Bottom Title & Faculty */}

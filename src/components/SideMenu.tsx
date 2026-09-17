@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import type { UserProfile } from "../types/onboarding";
-import { CITIES_LIST } from "../data/programs";
+import { CITIES_LIST, UNIVERSITY_PROGRAMS } from "../data/programs";
 import { AcademicOwl } from "./AcademicOwl";
 import { InteractiveOwlAvatar } from "./InteractiveOwlAvatar";
+import { loadFavoritesIds, removeFavoriteId } from "../utils/favoritesStorage";
 import {
   X,
   User,
+  Heart,
+  Trash2,
   GraduationCap,
   ArrowLeftRight,
   Sparkles,
@@ -25,6 +28,7 @@ interface SideMenuProps {
   onRetake: () => void;
   onNavigateToComparison: () => void;
   onNavigateToSteps: () => void;
+  onNavigateToFavorites?: () => void;
   onRestartOnboarding?: () => void;
   onUpdateProfile?: (updated: Partial<UserProfile>) => void;
 }
@@ -37,12 +41,29 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   onRetake,
   onNavigateToComparison,
   onNavigateToSteps,
+  onNavigateToFavorites,
   onRestartOnboarding,
   onUpdateProfile,
 }) => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isLinksModalOpen, setIsLinksModalOpen] = useState(false);
   const [isRestartConfirmOpen, setIsRestartConfirmOpen] = useState(false);
+  const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
+  const [favoritesIds, setFavoritesIds] = useState<string[]>(() => loadFavoritesIds());
+
+  // Listen to favorites updates
+  useEffect(() => {
+    const handleSync = (e: Event) => {
+      const customEvent = e as CustomEvent<string[]>;
+      if (customEvent.detail && Array.isArray(customEvent.detail)) {
+        setFavoritesIds(customEvent.detail);
+      } else {
+        setFavoritesIds(loadFavoritesIds());
+      }
+    };
+    window.addEventListener("favorites_updated", handleSync);
+    return () => window.removeEventListener("favorites_updated", handleSync);
+  }, []);
 
   // Profile form state inside modal
   const [editName, setEditName] = useState(profile.name);
@@ -50,6 +71,9 @@ export const SideMenu: React.FC<SideMenuProps> = ({
   const [profileSavedToast, setProfileSavedToast] = useState(false);
 
   const displayName = profile.name.trim() || "Абитуриент";
+
+  // Favorite program objects
+  const favoritePrograms = UNIVERSITY_PROGRAMS.filter((p) => favoritesIds.includes(p.id));
 
   // Close on Escape key
   useEffect(() => {
@@ -61,6 +85,8 @@ export const SideMenu: React.FC<SideMenuProps> = ({
           setIsLinksModalOpen(false);
         } else if (isRestartConfirmOpen) {
           setIsRestartConfirmOpen(false);
+        } else if (isFavoritesModalOpen) {
+          setIsFavoritesModalOpen(false);
         } else {
           onClose();
         }
@@ -70,7 +96,7 @@ export const SideMenu: React.FC<SideMenuProps> = ({
       window.addEventListener("keydown", handleKeyDown);
     }
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isProfileModalOpen, isLinksModalOpen, isRestartConfirmOpen, onClose]);
+  }, [isOpen, isProfileModalOpen, isLinksModalOpen, isRestartConfirmOpen, isFavoritesModalOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -155,7 +181,29 @@ export const SideMenu: React.FC<SideMenuProps> = ({
                 <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#1677FF] transition-colors" />
               </button>
 
-              {/* 2. Этапы поступления от Совы */}
+              {/* 2. Избранное */}
+              <button
+                type="button"
+                onClick={() => setIsFavoritesModalOpen(true)}
+                className="w-full p-3 rounded-2xl bg-white hover:bg-[#EFF6FF] border-2 border-slate-200 hover:border-[#1677FF] border-b-[3px] border-b-slate-300 hover:border-b-[#0A4EA8] text-slate-700 hover:text-[#0E2E59] font-bold text-xs sm:text-sm flex items-center gap-3 transition-all cursor-pointer text-left group active:translate-y-[1px]"
+              >
+                <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="font-black block text-[#0E2E59] leading-tight">Избранное</span>
+                  <span className="text-[11px] text-slate-400 font-medium truncate block mt-0.5">Сохранённые программы</span>
+                </div>
+                {favoritesIds.length > 0 ? (
+                  <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black">
+                    {favoritesIds.length}
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-slate-400 font-bold">0</span>
+                )}
+              </button>
+
+              {/* 3. Этапы поступления от Совы */}
               <button
                 type="button"
                 onClick={() => {
@@ -507,6 +555,116 @@ export const SideMenu: React.FC<SideMenuProps> = ({
                 Сбросить
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 4: Избранные программы */}
+      {isFavoritesModalOpen && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
+          <div
+            onClick={() => setIsFavoritesModalOpen(false)}
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in"
+          />
+
+          <div className="relative w-full max-w-md bg-white rounded-3xl border-2 border-[#1677FF] border-b-[5px] border-b-[#0A4EA8] shadow-2xl p-5 sm:p-6 z-10 animate-in zoom-in-95 duration-200 max-h-[88vh] flex flex-col">
+            <button
+              type="button"
+              onClick={() => setIsFavoritesModalOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center cursor-pointer transition-colors"
+              aria-label="Закрыть"
+            >
+              <X className="w-4 h-4 stroke-[2.5]" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 border border-rose-200 flex items-center justify-center shrink-0">
+                <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-[#0E2E59]">
+                  Избранное ({favoritesIds.length})
+                </h3>
+                <p className="text-xs text-slate-400 font-semibold">
+                  Твои сохранённые образовательные программы
+                </p>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5">
+              {favoritePrograms.length === 0 ? (
+                <div className="text-center py-8 px-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl">
+                  <AcademicOwl variant="reading" size="sm" className="mx-auto mb-2" />
+                  <h4 className="font-extrabold text-sm text-[#0E2E59] mb-1">
+                    В избранном пока пусто
+                  </h4>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                    Нажимай на сердечко ❤️ на карточке любой программы в каталоге, чтобы сохранить её сюда!
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsFavoritesModalOpen(false);
+                      onClose();
+                    }}
+                    className="px-4 py-2 rounded-xl bg-[#1677FF] text-white font-black text-xs border-b-2 border-[#0A4EA8] cursor-pointer"
+                  >
+                    Перейти к программам
+                  </button>
+                </div>
+              ) : (
+                favoritePrograms.map((prog) => (
+                  <div
+                    key={prog.id}
+                    className="p-3 rounded-2xl bg-[#F8FAFC] border-2 border-slate-200 hover:border-[#1677FF] flex items-center justify-between gap-3 transition-all group"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <span className="px-2 py-0.5 rounded-md bg-white border border-[#BFDBFE] text-[#1677FF] font-black text-[10px]">
+                          {prog.university}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-bold">
+                          • {prog.city}
+                        </span>
+                      </div>
+                      <h5 className="font-bold text-xs sm:text-sm text-[#0E2E59] truncate">
+                        {prog.title}
+                      </h5>
+                      <span className="text-[11px] text-slate-500 font-medium block truncate">
+                        Бюджет: {prog.budgetPassingScore} б. · Мест: {prog.budgetPlaces}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => removeFavoriteId(prog.id)}
+                      className="w-8 h-8 rounded-xl bg-white border border-slate-200 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600 text-slate-400 flex items-center justify-center cursor-pointer transition-colors shrink-0"
+                      title="Удалить из избранного"
+                      aria-label="Удалить из избранного"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {favoritePrograms.length > 0 && onNavigateToFavorites && (
+              <div className="pt-3 mt-3 border-t border-slate-100 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsFavoritesModalOpen(false);
+                    onClose();
+                    onNavigateToFavorites();
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-[#1677FF] hover:bg-[#156FE6] text-white font-black text-xs border-b-[3px] border-b-[#0A4EA8] active:translate-y-[1px] transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Heart className="w-3.5 h-3.5 fill-white" />
+                  <span>Показать все в каталоге</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

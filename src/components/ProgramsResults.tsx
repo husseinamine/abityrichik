@@ -6,9 +6,11 @@ import { DuolingoButton } from './DuolingoButton';
 import { ProgramDetailModal } from './ProgramDetailModal';
 import { SideMenu } from './SideMenu';
 import { InteractiveOwlAvatar, type LookDirection } from './InteractiveOwlAvatar';
+import { loadFavoritesIds, toggleFavoriteId } from '../utils/favoritesStorage';
 import {
   CheckCircle2,
   AlertCircle,
+  Heart,
   Sparkles,
   Search,
   MapPin,
@@ -40,7 +42,8 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
   onRestartOnboarding,
   onUpdateProfile,
 }) => {
-  const [filterCategory, setFilterCategory] = useState<'all' | 'budget' | 'paid' | 'it'>('all');
+  const [filterCategory, setFilterCategory] = useState<'all' | 'favorites' | 'budget' | 'paid' | 'it'>('all');
+  const [favoritesIds, setFavoritesIds] = useState<string[]>(() => loadFavoritesIds());
   const [selectedCity, setSelectedCity] = useState<string>(profile.preferredCity || 'Все города');
   const [selectedUniversity, setSelectedUniversity] = useState<string>('Все вузы');
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,6 +53,20 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
   const [lookDirection, setLookDirection] = useState<LookDirection>('neutral');
   const prevScrollTopRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<number | null>(null);
+
+  // Sync favorites in real time with localStorage and custom events
+  useEffect(() => {
+    const handleFavoritesSync = (e: Event) => {
+      const customEvent = e as CustomEvent<string[]>;
+      if (customEvent.detail && Array.isArray(customEvent.detail)) {
+        setFavoritesIds(customEvent.detail);
+      } else {
+        setFavoritesIds(loadFavoritesIds());
+      }
+    };
+    window.addEventListener('favorites_updated', handleFavoritesSync);
+    return () => window.removeEventListener('favorites_updated', handleFavoritesSync);
+  }, []);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const currentScrollTop = e.currentTarget.scrollTop;
@@ -111,6 +128,13 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
     }
   };
 
+  const handleToggleFavorite = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    const result = toggleFavoriteId(id);
+    setFavoritesIds(result.ids);
+    showToast(result.isFavorite ? 'Программа добавлена в избранное ❤️' : 'Программа удалена из избранного');
+  };
+
   // Extract unique university names
   const universitiesList = useMemo(() => {
     const unis = Array.from(new Set(UNIVERSITY_PROGRAMS.map((p) => p.university)));
@@ -121,32 +145,11 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
     return matchPrograms(profile, UNIVERSITY_PROGRAMS);
   }, [profile]);
 
-  // Filtered by city, uni, category, and search query
-  const filteredMatches = useMemo(() => {
+  // Matches filtered by city, university, and search query
+  const baseMatches = useMemo(() => {
     return allMatches.filter((m) => {
-      // City filter
-      if (selectedCity !== 'Все города' && m.program.city !== selectedCity) {
-        return false;
-      }
-
-      // University filter
-      if (selectedUniversity !== 'Все вузы' && m.program.university !== selectedUniversity) {
-        return false;
-      }
-
-      // Category filter
-      if (filterCategory === 'budget' && !m.qualifiesBudget) return false;
-      if (filterCategory === 'paid' && !m.qualifiesPaid) return false;
-      if (
-        filterCategory === 'it' &&
-        !m.program.tags.some((t) =>
-          ['IT', 'Data Science', 'Machine Learning', 'Архитектура ПО', 'Highload', 'AI'].includes(t)
-        )
-      ) {
-        return false;
-      }
-
-      // Search filter
+      if (selectedCity !== 'Все города' && m.program.city !== selectedCity) return false;
+      if (selectedUniversity !== 'Все вузы' && m.program.university !== selectedUniversity) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         return (
@@ -157,13 +160,29 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
           m.program.tags.some((t) => t.toLowerCase().includes(q))
         );
       }
-
       return true;
     });
-  }, [allMatches, selectedCity, selectedUniversity, filterCategory, searchQuery]);
+  }, [allMatches, selectedCity, selectedUniversity, searchQuery]);
 
-  const budgetCount = filteredMatches.filter((m) => m.qualifiesBudget).length;
-  const paidCount = filteredMatches.filter((m) => m.qualifiesPaid).length;
+  // Filtered by category (including favorites)
+  const filteredMatches = useMemo(() => {
+    return baseMatches.filter((m) => {
+      if (filterCategory === 'favorites') return favoritesIds.includes(m.program.id);
+      if (filterCategory === 'budget') return m.qualifiesBudget;
+      if (filterCategory === 'paid') return m.qualifiesPaid;
+      if (filterCategory === 'it') {
+        return m.program.tags.some((t) =>
+          ['IT', 'Data Science', 'Machine Learning', 'Архитектура ПО', 'Highload', 'AI'].includes(t)
+        );
+      }
+      return true;
+    });
+  }, [baseMatches, filterCategory, favoritesIds]);
+
+  const allCategoryCount = baseMatches.length;
+  const budgetCount = baseMatches.filter((m) => m.qualifiesBudget).length;
+  const paidCount = baseMatches.filter((m) => m.qualifiesPaid).length;
+  const favoritesCategoryCount = favoritesIds.length;
 
   return (
     <div
@@ -329,7 +348,24 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
                     : 'bg-white text-slate-600 border border-[#D0E0F2]'
                 }`}
               >
-                Все ({filteredMatches.length})
+                Все ({allCategoryCount})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterCategory('favorites')}
+                className={`px-2.5 py-1 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
+                  filterCategory === 'favorites'
+                    ? 'bg-rose-500 text-white border-b-2 border-rose-700'
+                    : 'bg-white text-slate-600 border border-[#D0E0F2] hover:text-rose-600'
+                }`}
+              >
+                <Heart
+                  className={`w-3.5 h-3.5 ${
+                    filterCategory === 'favorites' ? 'fill-white stroke-white' : 'fill-rose-500 text-rose-500'
+                  }`}
+                />
+                <span>Избранное ({favoritesCategoryCount})</span>
               </button>
 
               {profile.knowsScores && (
@@ -379,27 +415,59 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
       <div className="flex-1 p-3.5 sm:p-8 max-w-6xl mx-auto w-full">
         {filteredMatches.length === 0 ? (
           <div className="text-center py-12 bg-white border-2 border-dashed border-[#CADDF4] rounded-3xl p-6">
-            <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-[#0E2E59] mb-1">
-              Программы не найдены
-            </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Попробуй сбросить город ({selectedCity}) или выбрать «Все вузы».
-            </p>
-            <div className="flex justify-center gap-2">
-              <DuolingoButton
-                variant="secondary"
-                onClick={() => {
-                  setSelectedCity('Все города');
-                  setSelectedUniversity('Все вузы');
-                  setFilterCategory('all');
-                  setSearchQuery('');
-                }}
-                className="!h-11"
-              >
-                Сбросить фильтры
-              </DuolingoButton>
-            </div>
+            {filterCategory === 'favorites' ? (
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 border border-rose-200 flex items-center justify-center mx-auto mb-3">
+                  <Heart className="w-6 h-6 fill-rose-500 text-rose-500" />
+                </div>
+                <h3 className="text-lg font-bold text-[#0E2E59] mb-1">
+                  {favoritesIds.length === 0 ? 'В избранном пока пусто' : 'Нет избранных программ по заданным фильтрам'}
+                </h3>
+                <p className="text-xs text-slate-400 mb-4 max-w-sm mx-auto">
+                  {favoritesIds.length === 0
+                    ? 'Нажимай на сердечко ❤️ на любой карточке программы, чтобы сохранить её и вернуться к ней в любой момент.'
+                    : 'Попробуй сбросить город или поисковый запрос, чтобы увидеть все сохранённые программы.'}
+                </p>
+                <div className="flex justify-center gap-2">
+                  <DuolingoButton
+                    variant="primary"
+                    onClick={() => {
+                      setFilterCategory('all');
+                      setSelectedCity('Все города');
+                      setSelectedUniversity('Все вузы');
+                      setSearchQuery('');
+                    }}
+                    className="!h-11"
+                  >
+                    Показать все программы
+                  </DuolingoButton>
+                </div>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-[#0E2E59] mb-1">
+                  Программы не найдены
+                </h3>
+                <p className="text-xs text-slate-400 mb-4">
+                  Попробуй сбросить город ({selectedCity}) или выбрать «Все вузы».
+                </p>
+                <div className="flex justify-center gap-2">
+                  <DuolingoButton
+                    variant="secondary"
+                    onClick={() => {
+                      setSelectedCity('Все города');
+                      setSelectedUniversity('Все вузы');
+                      setFilterCategory('all');
+                      setSearchQuery('');
+                    }}
+                    className="!h-11"
+                  >
+                    Сбросить фильтры
+                  </DuolingoButton>
+                </div>
+              </>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
@@ -437,13 +505,32 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
 
                       {/* University & City Badges Overlaid at Top */}
                       <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
-                        <span className="px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-md text-[11px] font-black text-[#1677FF]">
+                        <span className="px-2.5 py-1 rounded-xl bg-white/95 backdrop-blur-md text-[11px] font-black text-[#1677FF] truncate max-w-[55%]">
                           {program.university}
                         </span>
-                        <span className="px-2.5 py-1 rounded-xl bg-black/50 backdrop-blur-md text-[11px] font-bold text-white flex items-center gap-1 border border-white/20">
-                          <MapPin className="w-3 h-3 text-blue-300" />
-                          {program.city}
-                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="px-2.5 py-1 rounded-xl bg-black/50 backdrop-blur-md text-[11px] font-bold text-white flex items-center gap-1 border border-white/20">
+                            <MapPin className="w-3 h-3 text-blue-300" />
+                            {program.city}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => handleToggleFavorite(e, program.id)}
+                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl backdrop-blur-md flex items-center justify-center transition-all cursor-pointer active:scale-90 ${
+                              favoritesIds.includes(program.id)
+                                ? 'bg-rose-500 text-white shadow-sm border border-rose-400'
+                                : 'bg-black/50 text-white/90 hover:bg-black/70 hover:text-rose-400 border border-white/20'
+                            }`}
+                            title={favoritesIds.includes(program.id) ? "Удалить из избранного" : "Добавить в избранное"}
+                            aria-label={favoritesIds.includes(program.id) ? "Удалить из избранного" : "Добавить в избранное"}
+                          >
+                            <Heart
+                              className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform ${
+                                favoritesIds.includes(program.id) ? 'fill-white stroke-white scale-110' : 'stroke-[2.2]'
+                              }`}
+                            />
+                          </button>
+                        </div>
                       </div>
 
                       {/* Title & Faculty Overlaid on Shadowed Background */}
@@ -658,6 +745,12 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
       <ProgramDetailModal
         program={activeModalProgram}
         profile={profile}
+        isFavorite={activeModalProgram ? favoritesIds.includes(activeModalProgram.id) : false}
+        onToggleFavorite={(id) => {
+          const res = toggleFavoriteId(id);
+          setFavoritesIds(res.ids);
+          showToast(res.isFavorite ? 'Программа добавлена в избранное ❤️' : 'Программа удалена из избранного');
+        }}
         onClose={() => setActiveModalProgram(null)}
       />
 
@@ -670,6 +763,11 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
         onRetake={onRetake}
         onNavigateToComparison={onNavigateToComparison}
         onNavigateToSteps={onNavigateToSteps}
+        onNavigateToFavorites={() => {
+          setSelectedCity('Все города');
+          setSelectedUniversity('Все вузы');
+          setFilterCategory('favorites');
+        }}
         onRestartOnboarding={onRestartOnboarding}
         onUpdateProfile={onUpdateProfile}
       />
