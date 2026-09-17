@@ -25,12 +25,12 @@ export const SubjectStep: React.FC<SubjectStepProps> = ({
   const canProceed = selectedSubjects.length >= 2;
 
   return (
-    <div className="flex-1 flex flex-col justify-between px-5 pb-6 overflow-hidden">
+    <div className="flex-1 flex flex-col justify-between px-4 sm:px-5 pb-4 sm:pb-6 overflow-hidden">
       {/* Scrollable upper area */}
-      <div className="flex-1 overflow-y-auto pt-2 pb-4">
+      <div className="flex-1 overflow-y-auto pt-1 sm:pt-2 pb-3 sm:pb-4">
         {/* Mascot Header */}
-        <div className="flex items-start justify-center max-w-full mb-6">
-          <div className="shrink-0 mt-6">
+        <div className="flex items-start justify-center max-w-full mb-2 sm:mb-6 shrink-0">
+          <div className="shrink-0 mt-2 sm:mt-6 scale-90 sm:scale-100">
             <Mascot />
           </div>
           <div className="shrink-0 -ml-2 sm:-ml-3 mt-0 z-10">
@@ -39,14 +39,14 @@ export const SubjectStep: React.FC<SubjectStepProps> = ({
         </div>
 
         {/* Instructions */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-2.5 sm:mb-4">
           <p className="text-xs font-bold uppercase tracking-wider text-[#355278]">
             Выбери минимум 2–3 предмета ЕГЭ
           </p>
         </div>
 
         {/* Subjects Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 max-w-5xl mx-auto">
           {EGE_SUBJECTS.map((subject) => {
             const isSelected = selectedSubjects.includes(subject.id);
 
@@ -55,7 +55,7 @@ export const SubjectStep: React.FC<SubjectStepProps> = ({
                 key={subject.id}
                 type="button"
                 onClick={() => onToggleSubject(subject.id)}
-                className={`w-full p-4 rounded-2xl flex items-center justify-between text-left transition-all duration-75 select-none cursor-pointer ${
+                className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl flex items-center justify-between text-left transition-all duration-75 select-none cursor-pointer ${
                   isSelected
                     ? 'bg-[#F0F7FF] border-2 border-[#1677FF] border-b-[4px] border-b-[#0A4EA8] active:translate-y-[2px] active:border-b-2'
                     : 'bg-white border-2 border-[#D3E2F4] border-b-[4px] border-b-[#BACEE5] hover:bg-[#F9FAFB] active:translate-y-[2px] active:border-b-2'

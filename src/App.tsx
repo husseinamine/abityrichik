@@ -11,7 +11,7 @@ import { ProgramsResults } from './components/ProgramsResults';
 import { ProgramComparisonPage } from './components/comparison/ProgramComparisonPage';
 import { AdmissionStepsPage } from './components/steps/AdmissionStepsPage';
 import type { UserProfile, SubjectId } from './types/onboarding';
-import { loadUserProfile, saveUserProfile, DEFAULT_PROFILE } from './utils/storage';
+import { loadUserProfile, saveUserProfile, clearUserProfile, DEFAULT_PROFILE } from './utils/storage';
 import {
   loadComparisonIds,
   toggleComparisonId,
@@ -19,6 +19,7 @@ import {
   replaceComparisonId,
   clearComparison,
 } from './utils/comparisonStorage';
+import { clearFavorites } from './utils/favoritesStorage';
 
 const TOTAL_ONBOARDING_STEPS = 7;
 
@@ -90,7 +91,15 @@ export function App() {
   };
 
   const handleRestartOnboarding = () => {
-    localStorage.removeItem('user_onboarding_profile');
+    try {
+      localStorage.clear();
+    } catch (e) {
+      console.error('Failed to clear localStorage', e);
+    }
+    clearFavorites();
+    clearComparison();
+    clearUserProfile();
+    setComparisonIds([]);
     setProfile(DEFAULT_PROFILE);
     setCurrentStepIndex(0);
     setView('onboarding');
@@ -177,11 +186,11 @@ export function App() {
 
   return (
     <div
-      className={`h-screen h-[100dvh] min-h-screen w-full bg-white flex flex-col justify-between overflow-hidden ${
+      className={`h-[100dvh] h-screen w-full bg-white flex flex-col justify-between overflow-hidden ${
         view === 'onboarding' ? 'select-none' : ''
       }`}
     >
-      <div className="w-full mx-auto flex-1 flex flex-col justify-between h-full">
+      <div className="w-full mx-auto flex-1 flex flex-col justify-between h-full overflow-hidden">
         {view === 'results' ? (
           <ProgramsResults
             profile={profile}

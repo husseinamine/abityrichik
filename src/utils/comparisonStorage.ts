@@ -65,5 +65,10 @@ export function replaceComparisonId(oldId: string, newId: string): string[] {
 }
 
 export function clearComparison(): void {
-  saveComparisonIds([]);
+  try {
+    localStorage.removeItem(COMPARISON_STORAGE_KEY);
+    window.dispatchEvent(new CustomEvent('comparison_updated', { detail: [] }));
+  } catch (e) {
+    console.error('Failed to clear comparison IDs from localStorage', e);
+  }
 }

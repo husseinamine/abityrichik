@@ -42,5 +42,10 @@ export function removeFavoriteId(id: string): string[] {
 }
 
 export function clearFavorites(): void {
-  saveFavoritesIds([]);
+  try {
+    localStorage.removeItem(FAVORITES_STORAGE_KEY);
+    window.dispatchEvent(new CustomEvent('favorites_updated', { detail: [] }));
+  } catch (e) {
+    console.error('Failed to clear favorites from localStorage', e);
+  }
 }

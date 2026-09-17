@@ -27,10 +27,10 @@ export const KnowsScoresStep: React.FC<KnowsScoresStepProps> = ({
   return (
     <div className="flex-1 flex flex-col justify-between px-5 pb-6 overflow-hidden">
       {/* Scrollable upper area */}
-      <div className="flex-1 overflow-y-auto pt-2 pb-4 flex flex-col items-center">
+      <div className="flex-1 overflow-y-auto pt-1 sm:pt-2 pb-3 flex flex-col items-center justify-center min-h-0">
         {/* Mascot & Speech Bubble */}
-        <div className="flex items-start justify-center max-w-full mb-6">
-          <div className="shrink-0 mt-6">
+        <div className="flex items-start justify-center max-w-full mb-2 sm:mb-5 shrink-0">
+          <div className="shrink-0 mt-2 sm:mt-5 scale-90 sm:scale-100">
             <Mascot />
           </div>
           <div className="shrink-0 -ml-2 sm:-ml-3 mt-0 z-10">
@@ -38,8 +38,8 @@ export const KnowsScoresStep: React.FC<KnowsScoresStepProps> = ({
           </div>
         </div>
 
-        <div className="text-center mb-6 max-w-md">
-          <h2 className="text-xl sm:text-2xl font-black text-[#0E2E59] mb-1">
+        <div className="text-center mb-3 sm:mb-5 max-w-md shrink-0">
+          <h2 className="text-lg sm:text-2xl font-black text-[#0E2E59] mb-1 leading-tight">
             У тебя уже есть баллы ЕГЭ?
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium">
@@ -48,12 +48,12 @@ export const KnowsScoresStep: React.FC<KnowsScoresStepProps> = ({
         </div>
 
         {/* 2 Option Cards */}
-        <div className="flex flex-col gap-3.5 w-full max-w-md mx-auto">
+        <div className="flex flex-col gap-2.5 sm:gap-3.5 w-full max-w-md mx-auto">
           {/* Option 1: Yes, I know my scores */}
           <button
             type="button"
             onClick={() => setSelectedChoice(true)}
-            className={`w-full text-left p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3.5 ${
+            className={`w-full text-left p-3.5 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-3 sm:gap-3.5 ${
               selectedChoice === true
                 ? 'bg-[#EFF6FF] border-[#1677FF] border-b-[5px] border-b-[#0A4EA8] scale-[1.01]'
                 : 'bg-white border-[#D3E2F4] border-b-[4px] border-b-[#BACEE5] hover:border-[#1677FF] hover:bg-[#F8FAFC]'

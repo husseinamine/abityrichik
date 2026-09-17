@@ -5,6 +5,7 @@ import { matchPrograms } from '../utils/matcher';
 import { DuolingoButton } from './DuolingoButton';
 import { ProgramDetailModal } from './ProgramDetailModal';
 import { SideMenu } from './SideMenu';
+import { FilterModal, type SortOrder, type ScoreSortTarget } from './FilterModal';
 import { InteractiveOwlAvatar, type LookDirection } from './InteractiveOwlAvatar';
 import { loadFavoritesIds, toggleFavoriteId } from '../utils/favoritesStorage';
 import {
@@ -19,6 +20,8 @@ import {
   ArrowLeftRight,
   Check,
   Menu,
+  SlidersHorizontal,
+  X,
 } from 'lucide-react';
 
 interface ProgramsResultsProps {
@@ -46,6 +49,10 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
   const [favoritesIds, setFavoritesIds] = useState<string[]>(() => loadFavoritesIds());
   const [selectedCity, setSelectedCity] = useState<string>(profile.preferredCity || 'Все города');
   const [selectedUniversity, setSelectedUniversity] = useState<string>('Все вузы');
+  const [selectedProgram, setSelectedProgram] = useState<string>('Все программы');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('default');
+  const [sortByScoreType, setSortByScoreType] = useState<ScoreSortTarget>('budget');
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeModalProgram, setActiveModalProgram] = useState<Program | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -141,15 +148,42 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
     return ['Все вузы', ...unis];
   }, []);
 
+  // Extract unique program titles
+  const programsList = useMemo(() => {
+    const progs = Array.from(new Set(UNIVERSITY_PROGRAMS.map((p) => p.title)));
+    return ['Все программы', ...progs];
+  }, []);
+
+  const handleResetAllFilters = () => {
+    setSelectedCity('Все города');
+    setSelectedUniversity('Все вузы');
+    setSelectedProgram('Все программы');
+    setFilterCategory('all');
+    setSearchQuery('');
+    setSortOrder('default');
+    setSortByScoreType('budget');
+  };
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (selectedCity !== 'Все города') count++;
+    if (selectedUniversity !== 'Все вузы') count++;
+    if (selectedProgram !== 'Все программы') count++;
+    if (sortOrder !== 'default') count++;
+    if (searchQuery.trim()) count++;
+    return count;
+  }, [selectedCity, selectedUniversity, selectedProgram, sortOrder, searchQuery]);
+
   const allMatches = useMemo(() => {
     return matchPrograms(profile, UNIVERSITY_PROGRAMS);
   }, [profile]);
 
-  // Matches filtered by city, university, and search query
+  // Matches filtered by city, university, program, and search query
   const baseMatches = useMemo(() => {
     return allMatches.filter((m) => {
       if (selectedCity !== 'Все города' && m.program.city !== selectedCity) return false;
       if (selectedUniversity !== 'Все вузы' && m.program.university !== selectedUniversity) return false;
+      if (selectedProgram !== 'Все программы' && m.program.title !== selectedProgram) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         return (
@@ -162,11 +196,11 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
       }
       return true;
     });
-  }, [allMatches, selectedCity, selectedUniversity, searchQuery]);
+  }, [allMatches, selectedCity, selectedUniversity, selectedProgram, searchQuery]);
 
-  // Filtered by category (including favorites)
+  // Filtered by category (including favorites) and sorted by passing score
   const filteredMatches = useMemo(() => {
-    return baseMatches.filter((m) => {
+    const list = baseMatches.filter((m) => {
       if (filterCategory === 'favorites') return favoritesIds.includes(m.program.id);
       if (filterCategory === 'budget') return m.qualifiesBudget;
       if (filterCategory === 'paid') return m.qualifiesPaid;
@@ -177,7 +211,29 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
       }
       return true;
     });
-  }, [baseMatches, filterCategory, favoritesIds]);
+
+    if (sortOrder === 'asc') {
+      return [...list].sort((a, b) => {
+        const scoreA =
+          sortByScoreType === 'paid' ? a.program.paidPassingScore : a.program.budgetPassingScore;
+        const scoreB =
+          sortByScoreType === 'paid' ? b.program.paidPassingScore : b.program.budgetPassingScore;
+        return scoreA - scoreB;
+      });
+    }
+
+    if (sortOrder === 'desc') {
+      return [...list].sort((a, b) => {
+        const scoreA =
+          sortByScoreType === 'paid' ? a.program.paidPassingScore : a.program.budgetPassingScore;
+        const scoreB =
+          sortByScoreType === 'paid' ? b.program.paidPassingScore : b.program.budgetPassingScore;
+        return scoreB - scoreA;
+      });
+    }
+
+    return list;
+  }, [baseMatches, filterCategory, favoritesIds, sortOrder, sortByScoreType]);
 
   const allCategoryCount = baseMatches.length;
   const budgetCount = baseMatches.filter((m) => m.qualifiesBudget).length;
@@ -290,52 +346,125 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
 
           {/* Search & Filters Section */}
           <div className="mt-2.5 flex flex-col gap-2">
-            {/* Search input (full width) */}
-            <div className="relative flex items-center bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-3 py-1.5 sm:py-2 w-full">
-              <Search className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
-              <input
-                type="text"
-                placeholder="Поиск по названию, вузу, городу..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#0E2E59] placeholder:text-slate-400 placeholder:font-normal focus:outline-none"
-              />
-            </div>
-
-            {/* City & University Selectors ON THE SAME LINE */}
-            <div className="grid grid-cols-2 gap-2 w-full">
-              {/* City Selector */}
-              <div className="relative flex items-center bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-2.5 py-1.5 min-w-0">
-                <MapPin className="w-3.5 h-3.5 text-[#1677FF] mr-1.5 shrink-0" />
-                <select
-                  value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
-                  className="w-full bg-transparent text-xs font-bold text-[#0E2E59] focus:outline-none cursor-pointer truncate pr-1"
-                >
-                  {CITIES_LIST.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
+            {/* Search input + Filter Menu Button */}
+            <div className="flex items-center gap-2 w-full">
+              <div className="relative flex items-center bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-3 py-1.5 sm:py-2 flex-1 min-w-0">
+                <Search className="w-3.5 h-3.5 text-slate-400 mr-2 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Поиск по названию, вузу, городу..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#0E2E59] placeholder:text-slate-400 placeholder:font-normal focus:outline-none"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="text-slate-400 hover:text-slate-600 ml-1 shrink-0 cursor-pointer"
+                    aria-label="Очистить поиск"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
 
-              {/* University Selector */}
-              <div className="relative flex items-center bg-[#F1F5F9] border border-[#CADDF4] rounded-xl px-2.5 py-1.5 min-w-0">
-                <Building2 className="w-3.5 h-3.5 text-[#1677FF] mr-1.5 shrink-0" />
-                <select
-                  value={selectedUniversity}
-                  onChange={(e) => setSelectedUniversity(e.target.value)}
-                  className="w-full bg-transparent text-xs font-bold text-[#0E2E59] focus:outline-none cursor-pointer truncate pr-1"
-                >
-                  {universitiesList.map((uni) => (
-                    <option key={uni} value={uni}>
-                      {uni}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Filter Menu Trigger Button */}
+              <button
+                type="button"
+                onClick={() => setIsFilterModalOpen(true)}
+                className={`h-9 sm:h-10 px-3 sm:px-3.5 rounded-xl border-2 flex items-center gap-1.5 sm:gap-2 font-black text-xs cursor-pointer transition-all active:translate-y-[1px] shrink-0 ${
+                  activeFiltersCount > 0
+                    ? 'bg-[#EFF6FF] border-[#1677FF] border-b-[3px] border-b-[#0A4EA8] text-[#1677FF]'
+                    : 'bg-white border-[#CADDF4] border-b-[3px] border-b-[#BACEE5] text-[#0E2E59] hover:border-[#1677FF] hover:bg-[#F8FAFC]'
+                }`}
+                title="Открыть меню фильтров"
+                aria-label="Фильтры"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1677FF] shrink-0" />
+                <span className="hidden xs:inline">Фильтры</span>
+                {activeFiltersCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-[#1677FF] text-white text-[10px] font-black leading-none">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
             </div>
+
+            {/* Active Filters Badges */}
+            {activeFiltersCount > 0 && (
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-[11px] flex-nowrap">
+                <span className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider shrink-0">
+                  Активно:
+                </span>
+
+                {sortOrder !== 'default' && (
+                  <button
+                    type="button"
+                    onClick={() => setSortOrder('default')}
+                    className="px-2 py-0.5 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] text-[#1677FF] font-bold flex items-center gap-1 shrink-0 hover:bg-blue-100 cursor-pointer"
+                  >
+                    <span>
+                      Балл: {sortOrder === 'asc' ? 'по возрастанию ↗️' : 'по убыванию ↘️'}
+                    </span>
+                    <X className="w-3 h-3 stroke-[2.5]" />
+                  </button>
+                )}
+
+                {selectedUniversity !== 'Все вузы' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedUniversity('Все вузы')}
+                    className="px-2 py-0.5 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] text-[#1677FF] font-bold flex items-center gap-1 shrink-0 hover:bg-blue-100 cursor-pointer"
+                  >
+                    <span>Вуз: {selectedUniversity}</span>
+                    <X className="w-3 h-3 stroke-[2.5]" />
+                  </button>
+                )}
+
+                {selectedProgram !== 'Все программы' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProgram('Все программы')}
+                    className="px-2 py-0.5 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] text-[#1677FF] font-bold flex items-center gap-1 shrink-0 hover:bg-blue-100 cursor-pointer"
+                  >
+                    <span className="truncate max-w-[140px]">Программа: {selectedProgram}</span>
+                    <X className="w-3 h-3 stroke-[2.5]" />
+                  </button>
+                )}
+
+                {selectedCity !== 'Все города' && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCity('Все города')}
+                    className="px-2 py-0.5 rounded-lg bg-[#EFF6FF] border border-[#BFDBFE] text-[#1677FF] font-bold flex items-center gap-1 shrink-0 hover:bg-blue-100 cursor-pointer"
+                  >
+                    <span>Город: {selectedCity}</span>
+                    <X className="w-3 h-3 stroke-[2.5]" />
+                  </button>
+                )}
+
+                {searchQuery.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 font-bold flex items-center gap-1 shrink-0 hover:bg-slate-200 cursor-pointer"
+                  >
+                    <span className="truncate max-w-[120px]">Поиск: «{searchQuery}»</span>
+                    <X className="w-3 h-3 stroke-[2.5]" />
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleResetAllFilters}
+                  className="text-[11px] font-bold text-slate-400 hover:text-rose-500 underline ml-1 shrink-0 cursor-pointer"
+                >
+                  Сбросить всё
+                </button>
+              </div>
+            )}
+
 
             {/* Filter Pills: ONE LINE ONLY, COMPACT */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs flex-nowrap">
@@ -449,18 +578,13 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
                 <h3 className="text-lg font-bold text-[#0E2E59] mb-1">
                   Программы не найдены
                 </h3>
-                <p className="text-xs text-slate-400 mb-4">
-                  Попробуй сбросить город ({selectedCity}) или выбрать «Все вузы».
+                <p className="text-xs text-slate-400 mb-4 text-center max-w-xs">
+                  Попробуй сбросить фильтры или изменить параметры поиска.
                 </p>
                 <div className="flex justify-center gap-2">
                   <DuolingoButton
                     variant="secondary"
-                    onClick={() => {
-                      setSelectedCity('Все города');
-                      setSelectedUniversity('Все вузы');
-                      setFilterCategory('all');
-                      setSearchQuery('');
-                    }}
+                    onClick={handleResetAllFilters}
                     className="!h-11"
                   >
                     Сбросить фильтры
@@ -770,6 +894,28 @@ export const ProgramsResults: React.FC<ProgramsResultsProps> = ({
         }}
         onRestartOnboarding={onRestartOnboarding}
         onUpdateProfile={onUpdateProfile}
+      />
+
+      {/* Filter & Sort Modal Dialog */}
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        selectedUniversity={selectedUniversity}
+        onSelectUniversity={setSelectedUniversity}
+        universitiesList={universitiesList}
+        selectedProgram={selectedProgram}
+        onSelectProgram={setSelectedProgram}
+        programsList={programsList}
+        sortOrder={sortOrder}
+        onSelectSortOrder={setSortOrder}
+        sortByScoreType={sortByScoreType}
+        onSelectSortByScoreType={setSortByScoreType}
+        selectedCity={selectedCity}
+        onSelectCity={setSelectedCity}
+        citiesList={CITIES_LIST}
+        onResetFilters={handleResetAllFilters}
+        activeFiltersCount={activeFiltersCount}
+        filteredCount={filteredMatches.length}
       />
     </div>
   );
